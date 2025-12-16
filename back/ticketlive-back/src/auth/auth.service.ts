@@ -1,5 +1,6 @@
-import { Injectable } from '@nestjs/common';
-import { UsersService } from '../users/users.service';
+import { Injectable } from "@nestjs/common";
+import { UsersService } from "../users/users.service";
+import { JwtModule } from "@nestjs/jwt";
 
 @Injectable()
 export class AuthService {
@@ -12,16 +13,23 @@ export class AuthService {
   }) {
     const { googleId, email, name } = googleUser;
 
-    let user = await this.usersService.findByGoogleId(googleId);
+    let user = await this.usersService.findByEmail(email);
 
-    if (!user) {
-      user = await this.usersService.createFromGoogle({
-        googleId,
-        email,
-        name,
-        isAdmin: false,
-      });
+    //Login
+    if (user) {
+      return {
+        message: "Usuario logeado",
+        token: "token",
+      };
     }
+
+    //Register
+    user = await this.usersService.createFromGoogle({
+      googleId,
+      email,
+      name,
+      isAdmin: false,
+    });
 
     return user;
   }

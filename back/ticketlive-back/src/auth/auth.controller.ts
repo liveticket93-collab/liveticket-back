@@ -6,10 +6,15 @@ import { AuthService } from "./auth.service";
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  @Get("google/login")
+  @UseGuards(AuthGuard("google"))
+  googleLogin() {} //Nunca se ejecuta solo sirve para disparar el flujo OAuth
+
   @Get("google/register")
   @UseGuards(AuthGuard("google"))
-  async googleAuth() {}
+  googleRegister() {} //Nunca se ejecuta solo sirve para disparar el flujo OAuth
 
+  //Google vuelve con code -> Passport valida con Google -> Se ejecuta tu GoogleStrategy.validate -> Resultadi queda en req.user
   @Get("google/callback")
   @UseGuards(AuthGuard("google"))
   async googleAuthCallback(@Req() req) {
