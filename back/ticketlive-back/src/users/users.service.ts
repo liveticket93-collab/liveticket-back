@@ -1,15 +1,15 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { UsersRepository } from './users.repository';
-import { User } from './users.entity';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { Injectable, NotFoundException } from "@nestjs/common";
+import { UsersRepository } from "./users.repository";
+import { User } from "./users.entity";
+import { UpdateUserDto } from "./dto/update-user.dto";
 
 @Injectable()
 export class UsersService {
   constructor(private readonly usersRepository: UsersRepository) {}
 
-  async createFromGoogle(data: Partial<User>) {
-    const user = this.usersRepository.create(data);
-    return this.usersRepository.save(user);
+  ///Metodos
+  createFromGoogle(data: Partial<User>) {
+    return this.usersRepository.createFromGoogle(data);
   }
 
   findByGoogleId(googleId: string) {
@@ -17,17 +17,10 @@ export class UsersService {
   }
 
   findById(id: string) {
-    return this.usersRepository.findOne({ where: { id } });
+    return this.usersRepository.findById(id);
   }
 
-  async updateProfile(id: string, updateUserDto: UpdateUserDto) {
-    const user = await this.findById(id);
-
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
-
-    Object.assign(user, updateUserDto);
-    return this.usersRepository.save(user);
+  updateProfile(id: string, updateUserDto: UpdateUserDto) {
+    return this.usersRepository.updateUSer(id, updateUserDto);
   }
 }
