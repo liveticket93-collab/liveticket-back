@@ -18,6 +18,7 @@ export class AuthController {
   @Get("google/callback")
   @UseGuards(AuthGuard("google"))
   async googleAuthCallback(@Req() req) {
+    console.log(req.user);
     const user = await this.authService.validateGoogleUser(req.user);
     return user;
   }

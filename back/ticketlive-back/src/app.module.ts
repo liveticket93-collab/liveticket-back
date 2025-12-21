@@ -1,15 +1,15 @@
-import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { Module } from "@nestjs/common";
+import { ConfigModule, ConfigService } from "@nestjs/config";
+import { TypeOrmModule } from "@nestjs/typeorm";
 
 //import { AppController } from './app.controller';
 //import { AppService } from './app.service';
 
-import { UsersModule } from './users/users.module';
-import { AuthModule } from './auth/auth.module';
-import { EventModule } from './event/event.module';
-
-
+import { UsersModule } from "./modules/users/users.module";
+import { AuthModule } from "./modules/auth/auth.module";
+import { EventModule } from "./modules/event/event.module";
+import { OrdersModule } from "./modules/orders/orders.module";
+import { CategoriesModule } from "./modules/categories/categories.module";
 
 @Module({
   imports: [
@@ -25,12 +25,15 @@ import { EventModule } from './event/event.module';
         password: config.get("DB_PASSWORD"),
         database: config.get("DB_NAME"),
         autoLoadEntities: true,
-        synchronize: false,
+        synchronize: true,
       }),
     }),
     UsersModule,
     AuthModule,
     EventModule,
+    OrdersModule,
+    CategoriesModule,
+    // EventModule,
   ],
   controllers: [],
   providers: [],

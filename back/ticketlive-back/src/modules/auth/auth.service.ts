@@ -10,10 +10,14 @@ export class AuthService {
     googleId: string;
     email: string;
     name: string;
+    photo: string;
   }) {
-    const { googleId, email, name } = googleUser;
+    const { googleId, email, name, photo } = googleUser;
 
     let user = await this.usersService.findByEmail(email);
+    const highResPhoto = photo
+      ? photo.slice(0, photo.lastIndexOf("=")) + "=s1000-c"
+      : null;
 
     //Login
     if (user) {
@@ -29,6 +33,7 @@ export class AuthService {
       email,
       name,
       isAdmin: false,
+      profile_photo: highResPhoto,
     });
 
     return user;
