@@ -25,7 +25,7 @@ import { EventModule } from './event/event.module';
         password: config.get("DB_PASSWORD"),
         database: config.get("DB_NAME"),
         autoLoadEntities: true,
-        synchronize: false,
+        synchronize: true,
       }),
     }),
     UsersModule,
