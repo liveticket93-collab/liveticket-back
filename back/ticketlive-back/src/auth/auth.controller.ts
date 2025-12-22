@@ -25,7 +25,6 @@ export class AuthController {
     const user = await this.authService.validateGoogleUser(req.user);
 
     const token = await this.authService.generateToken(user);
-    console.log('FRONT_URL:', this.config.get<string>('FRONT_URL'));
 
     return res.redirect(
   `${this.config.get<string>('FRONT_URL')}${this.config.get<string>('FRONT_CALLBACK')}?token=${token}`);
