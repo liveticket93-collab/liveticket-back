@@ -1,34 +1,53 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { EventService } from './event.service';
-import { CreateEventDto } from './dto/create-event.dto';
-import { UpdateEventDto } from './dto/update-event.dto';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Query,
+  ParseUUIDPipe,
+} from "@nestjs/common";
+import { EventsService } from "./event.service";
+import { CreateEventDto } from "./dto/create-event.dto";
+import { UpdateEventDto } from "./dto/update-event.dto";
+import { Event } from "./entities/event.entity";
 
-@Controller('event')
-export class EventController {
-  constructor(private readonly eventService: EventService) {}
-
-  @Post()
-  create(@Body() createEventDto: CreateEventDto) {
-    return this.eventService.create(createEventDto);
-  }
+@Controller("events")
+export class EventsController {
+  constructor(private readonly eventsService: EventsService) {}
 
   @Get()
-  findAll() {
-    return this.eventService.findAll();
+  async findAll(
+    @Query("page") page?: number,
+    @Query("limit") limit?: number
+  ): Promise<Event[]> {
+    return this.eventsService.findAll(Number(page) || 1, Number(limit) || 10);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.eventService.findOne(+id);
+  @Get(":id")
+  async findOne(@Param("id", new ParseUUIDPipe()) id: string): Promise<Event> {
+    return this.eventsService.findOne(id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateEventDto: UpdateEventDto) {
-    return this.eventService.update(+id, updateEventDto);
+  @Post()
+  async create(@Body() createEventDto: CreateEventDto): Promise<Event> {
+    return this.eventsService.create(createEventDto);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.eventService.remove(+id);
+  @Patch(":id")
+  async update(
+    @Param("id", new ParseUUIDPipe()) id: string,
+    @Body() updateEventDto: UpdateEventDto
+  ): Promise<{ id: string }> {
+    return this.eventsService.update(id, updateEventDto);
+  }
+
+  @Delete(":id")
+  async remove(
+    @Param("id", new ParseUUIDPipe()) id: string
+  ): Promise<{ id: string }> {
+    return this.eventsService.remove(id);
   }
 }
