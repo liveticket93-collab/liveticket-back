@@ -1,4 +1,15 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { use } from "passport";
+import { OrderDetail } from "src/entities/orderDetails.entity";
+import { User } from "src/modules/users/entities/users.entity";
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  OneToOne,
+  PrimaryGeneratedColumn,
+} from "typeorm";
 
 @Entity({ name: "orders" })
 export class Order {
@@ -13,4 +24,13 @@ export class Order {
 
   @Column()
   status: string;
+
+  //Users 1:N Orders
+  @ManyToOne(() => User, (user) => user.orders)
+  user: User;
+
+  //Order 1:1 OrderDetail
+  @OneToOne(() => OrderDetail, (detail) => detail.order)
+  @JoinColumn({ name: "order_detail" })
+  order_detail: OrderDetail;
 }

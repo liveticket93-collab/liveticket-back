@@ -1,4 +1,12 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { OrderDetail } from "src/entities/orderDetails.entity";
+import { Category } from "src/modules/categories/entities/category.entity";
+import {
+  Column,
+  Entity,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from "typeorm";
 
 @Entity({ name: "events" })
 export class Event {
@@ -31,4 +39,12 @@ export class Event {
 
   @Column()
   status: boolean;
+
+  //Event N:1 Category
+  @ManyToOne(() => Category, (category) => category.envents)
+  category: Category;
+
+  //Event 1:N Order_detail
+  @OneToMany(() => OrderDetail, (detail) => detail.event)
+  order_details: OrderDetail[];
 }
