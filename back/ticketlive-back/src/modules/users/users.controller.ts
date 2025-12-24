@@ -13,4 +13,5 @@ export class UsersController {
   ) {
     return this.usersService.updateProfile(id, updateUserDto);
   }
+
 }

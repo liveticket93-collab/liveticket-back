@@ -1,25 +1,36 @@
-import { Controller, Get, Req, UseGuards } from "@nestjs/common";
+import { Controller, Get, Req, Res, UseGuards } from "@nestjs/common";
 import { AuthGuard } from "@nestjs/passport";
 import { AuthService } from "./auth.service";
+import { ConfigService } from "@nestjs/config";
 
 @Controller("auth")
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly config: ConfigService
+  ) {}
 
   @Get("google/login")
   @UseGuards(AuthGuard("google"))
-  googleLogin() {} //Nunca se ejecuta solo sirve para disparar el flujo OAuth
+  googleLogin() {}
 
   @Get("google/register")
   @UseGuards(AuthGuard("google"))
-  googleRegister() {} //Nunca se ejecuta solo sirve para disparar el flujo OAuth
+  googleRegister() {}
 
   //Google vuelve con code -> Passport valida con Google -> Se ejecuta tu GoogleStrategy.validate -> Resultadi queda en req.user
   @Get("google/callback")
   @UseGuards(AuthGuard("google"))
-  async googleAuthCallback(@Req() req) {
+  async googleAuthCallback(@Req() req, @Res() res) {
     console.log(req.user);
     const user = await this.authService.validateGoogleUser(req.user);
-    return user;
+
+    const token = await this.authService.generateToken(user);
+
+    return res.redirect(
+      `${this.config.get<string>("FRONT_URL")}${this.config.get<string>(
+        "FRONT_CALLBACK"
+      )}?token=${token}`
+    );
   }
 }
