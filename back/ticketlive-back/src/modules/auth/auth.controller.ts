@@ -8,29 +8,33 @@ export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly config: ConfigService
-  ) {}
+  ) { }
 
   @Get("google/login")
   @UseGuards(AuthGuard("google"))
-  googleLogin() {}
+  googleLogin() { }
 
   @Get("google/register")
   @UseGuards(AuthGuard("google"))
-  googleRegister() {}
+  googleRegister() { }
 
-  //Google vuelve con code -> Passport valida con Google -> Se ejecuta tu GoogleStrategy.validate -> Resultadi queda en req.user
-  @Get("google/callback")
-  @UseGuards(AuthGuard("google"))
+
+  @Get('google/callback')
+  @UseGuards(AuthGuard('google'))
   async googleAuthCallback(@Req() req, @Res() res) {
-    console.log(req.user);
     const user = await this.authService.validateGoogleUser(req.user);
-
     const token = await this.authService.generateToken(user);
 
+    res.cookie('access_token', token, {
+      httpOnly: true,       
+      secure: false,        
+      sameSite: 'lax',      
+      maxAge: 24 * 60 * 60 * 1000, 
+    });
+
     return res.redirect(
-      `${this.config.get<string>("FRONT_URL")}${this.config.get<string>(
-        "FRONT_CALLBACK"
-      )}?token=${token}`
+      `${this.config.get<string>('FRONT_URL')}${this.config.get<string>('FRONT_CALLBACK')}`
     );
   }
+
 }
