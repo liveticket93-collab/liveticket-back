@@ -1,40 +1,97 @@
-import { Controller, Get, Req, Res, UseGuards } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Req,
+  Res,
+  UseGuards,
+} from "@nestjs/common";
 import { AuthGuard } from "@nestjs/passport";
 import { AuthService } from "./auth.service";
 import { ConfigService } from "@nestjs/config";
+import { CreateUserDto, LoginUserDto } from "../users/dto/users.dto";
+import { ApiOperation, ApiTags } from "@nestjs/swagger";
 
+@ApiTags("Auth")
 @Controller("auth")
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly config: ConfigService
-  ) { }
+  ) {}
 
-  @Get("google/login")
+  //Login register formulario
+  @ApiOperation({
+    summary: "Permite el loggin de un usuario mediante email y password",
+  })
+  @Post("/signin")
+  async signIn(
+    @Body() credential: LoginUserDto,
+    @Res({ passthrough: true }) res
+  ) {
+    const user = await this.authService.signIn(
+      credential.email,
+      credential.password
+    );
+    const token = await this.authService.generateToken(user);
+
+    res.cookie("access_token", token, {
+      httpOnly: true,
+      secure: false,
+      sameSite: "lax",
+      maxAge: 24 * 60 * 60 * 1000,
+    });
+
+    return { message: "Usuario loggeado exitosamente" };
+  }
+
+  @ApiOperation({
+    summary: "Permite registrar un usuario mediante formulario",
+  })
+  @Post("/signup")
+  async signUp(@Body() user: CreateUserDto, @Res({ passthrough: true }) res) {
+    const newUser = await this.authService.signUp(user);
+    const token = await this.authService.generateToken(newUser);
+    res.cookie("access_token", token, {
+      httpOnly: true,
+      secure: false,
+      sameSite: "lax",
+      maxAge: 24 * 60 * 60 * 1000,
+    });
+
+    return { message: "Usuario creado exitosamente", user: newUser };
+  }
+
+  //Login Register con google
+  @ApiOperation({
+    summary:
+      "Permite registrar un usuario si no consta en la base de datos o loggearlo si ya consta, utilizando google auth",
+  })
+  @Get("google")
   @UseGuards(AuthGuard("google"))
-  googleLogin() { }
+  googleLogin() {}
 
-  @Get("google/register")
+  @ApiOperation({
+    summary: "Callback llamado por /google/service",
+  })
+  @Get("google/callback")
   @UseGuards(AuthGuard("google"))
-  googleRegister() { }
-
-
-  @Get('google/callback')
-  @UseGuards(AuthGuard('google'))
-  async googleAuthCallback(@Req() req, @Res() res) {
+  async googleAuthCallback(@Req() req, @Res({ passthrough: true }) res) {
     const user = await this.authService.validateGoogleUser(req.user);
     const token = await this.authService.generateToken(user);
 
-    res.cookie('access_token', token, {
-      httpOnly: true,       
-      secure: false,        
-      sameSite: 'lax',      
-      maxAge: 24 * 60 * 60 * 1000, 
+    res.cookie("access_token", token, {
+      httpOnly: true,
+      secure: false,
+      sameSite: "lax",
+      maxAge: 24 * 60 * 60 * 1000,
     });
 
     return res.redirect(
-      `${this.config.get<string>('FRONT_URL')}${this.config.get<string>('FRONT_CALLBACK')}`
+      `${this.config.get<string>("FRONT_URL")}${this.config.get<string>(
+        "FRONT_CALLBACK"
+      )}`
     );
   }
-
 }

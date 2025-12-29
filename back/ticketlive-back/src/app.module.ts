@@ -1,41 +1,29 @@
 import { Module } from "@nestjs/common";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { TypeOrmModule } from "@nestjs/typeorm";
-
-//import { AppController } from './app.controller';
-//import { AppService } from './app.service';
+import { typeOrmConfig } from "./config/typeorm";
 
 import { UsersModule } from "./modules/users/users.module";
 import { AuthModule } from "./modules/auth/auth.module";
 import { EventModule } from "./modules/event/event.module";
 import { OrdersModule } from "./modules/orders/orders.module";
 import { CategoriesModule } from "./modules/categories/categories.module";
+import { FileUploadModule } from './modules/file-upload/file-upload.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
+    ConfigModule.forRoot({ isGlobal: true, load: [typeOrmConfig] }),
     TypeOrmModule.forRootAsync({
-      imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (config: ConfigService) => ({
-        type: "postgres",
-        host: config.get("DB_HOST"),
-        port: Number(config.get("DB_PORT")),
-        username: config.get("DB_USERNAME"),
-        password: config.get("DB_PASSWORD"),
-        database: config.get("DB_NAME"),
-        entities: ["dist/**/*.entity{.ts,.js}"],
-        autoLoadEntities: true,
-        synchronize: true,
-      }),
+      useFactory: (configService: ConfigService) =>
+        configService.get("typeorm_config")!, // <- coincide con registerAs
     }),
     UsersModule,
     AuthModule,
     EventModule,
     OrdersModule,
     CategoriesModule,
+    FileUploadModule,
   ],
-  controllers: [],
-  providers: [],
 })
 export class AppModule {}

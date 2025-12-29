@@ -35,7 +35,10 @@ export class User {
   phone?: string;
 
   @Column({ type: "varchar", nullable: true })
-  profile_photo: string | null;
+  profile_photo?: string | null;
+
+  @Column({ nullable: true })
+  profile_photo_id?: string;
 
   @Column({ type: "varchar", nullable: true })
   address?: string;

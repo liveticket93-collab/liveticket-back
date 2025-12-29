@@ -32,9 +32,16 @@ async function bootstrap() {
   //Coonfiguración documentación
   const swaggerConfig = new DocumentBuilder()
     .setTitle("TicketLive API")
-    .setDescription("API documentation")
+    .setDescription("API documentation JWT")
     .setVersion("1.0.0")
-    .addBearerAuth()
+    .addBearerAuth(
+      {
+        type: "http",
+        scheme: "bearer",
+        bearerFormat: "JWT",
+      },
+      "jwt-auth"
+    )
     .build(); //Clase para documentacion OPENAPI 3.0
 
   const document = SwaggerModule.createDocument(app, swaggerConfig);
@@ -45,3 +52,5 @@ async function bootstrap() {
   console.log(`🚀 Server running on http://localhost:${port}`);
 }
 bootstrap();
+
+//Para instalar swagger se debe utilizar npm i @nestjs/swagger --legacy-peer-deps

@@ -1,15 +1,15 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { UsersRepository } from "./users.repository";
 import { User } from "./entities/users.entity";
-import { UpdateUserDto } from "./dto/update-user.dto";
+import { UpdateUserDto } from "./dto/users.dto";
 
 @Injectable()
 export class UsersService {
   constructor(private readonly usersRepository: UsersRepository) {}
 
   ///Metodos
-  createFromGoogle(data: Partial<User>) {
-    return this.usersRepository.createFromGoogle(data);
+  createUser(data: Partial<User>) {
+    return this.usersRepository.createUser(data);
   }
 
   findByGoogleId(googleId: string) {
@@ -25,6 +25,6 @@ export class UsersService {
   }
 
   updateProfile(id: string, updateUserDto: UpdateUserDto) {
-    return this.usersRepository.updateUSer(id, updateUserDto);
+    return this.usersRepository.updateUser(id, updateUserDto);
   }
 }
