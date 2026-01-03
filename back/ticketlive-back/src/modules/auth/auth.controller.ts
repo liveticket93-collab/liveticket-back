@@ -73,7 +73,7 @@ export class AuthController {
   googleLogin() {}
 
   @ApiOperation({
-    summary: "Callback llamado por /google/service",
+    summary: "Callback llamado por /google",
   })
   @Get("google/callback")
   @UseGuards(AuthGuard("google"))

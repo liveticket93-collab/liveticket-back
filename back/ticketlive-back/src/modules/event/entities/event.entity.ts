@@ -46,7 +46,7 @@ export class Event {
   status: boolean;
 
   //Event N:1 Category
-  @ManyToOne(() => Category, (category) => category.envents)
+  @ManyToOne(() => Category, (category) => category.events)
   category: Category;
 
   //Event 1:N Order_detail

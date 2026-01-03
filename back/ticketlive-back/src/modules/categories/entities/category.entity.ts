@@ -2,7 +2,7 @@ import { Event } from "src/modules/event/entities/event.entity";
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity({
-  name: "catgories",
+  name: "categories",
 })
 export class Category {
   @PrimaryGeneratedColumn("uuid")
@@ -13,5 +13,5 @@ export class Category {
 
   //Event N:1 Category
   @OneToMany(() => Event, (event) => event.category)
-  envents: Event[];
+  events: Event[];
 }

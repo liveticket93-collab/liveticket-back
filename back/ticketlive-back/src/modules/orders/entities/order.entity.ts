@@ -1,4 +1,3 @@
-import { use } from "passport";
 import { OrderDetail } from "src/entities/orderDetails.entity";
 import { User } from "src/modules/users/entities/users.entity";
 import {
@@ -6,7 +5,6 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
-  OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
 } from "typeorm";

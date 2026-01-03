@@ -2,13 +2,13 @@ import { Module } from "@nestjs/common";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { typeOrmConfig } from "./config/typeorm";
-
 import { UsersModule } from "./modules/users/users.module";
 import { AuthModule } from "./modules/auth/auth.module";
 import { EventModule } from "./modules/event/event.module";
 import { OrdersModule } from "./modules/orders/orders.module";
 import { CategoriesModule } from "./modules/categories/categories.module";
-import { FileUploadModule } from './modules/file-upload/file-upload.module';
+import { FileUploadModule } from "./modules/file-upload/file-upload.module";
+import { DatabaseModule } from "./database/seed.module";
 
 @Module({
   imports: [
@@ -24,6 +24,7 @@ import { FileUploadModule } from './modules/file-upload/file-upload.module';
     OrdersModule,
     CategoriesModule,
     FileUploadModule,
+    //DatabaseModule, // 👈 Solo al hacer el npm run seed caso contrario comentar
   ],
 })
 export class AppModule {}
