@@ -24,7 +24,7 @@ import { DatabaseModule } from "./database/seed.module";
     OrdersModule,
     CategoriesModule,
     FileUploadModule,
-    //DatabaseModule, // 👈 Solo al hacer el npm run seed caso contrario comentar
+    // DatabaseModule, // 👈 Solo al hacer el npm run seed caso contrario comentar
   ],
 })
 export class AppModule {}

@@ -11,7 +11,9 @@ import { AuthGuard } from "@nestjs/passport";
 import { AuthService } from "./auth.service";
 import { ConfigService } from "@nestjs/config";
 import { CreateUserDto, LoginUserDto } from "../users/dto/users.dto";
-import { ApiOperation, ApiTags } from "@nestjs/swagger";
+import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
+import { JwtAuthGuard } from "./guard/jwt-auth.guard";
+import type { Response } from "express";
 
 @ApiTags("Auth")
 @Controller("auth")
@@ -44,6 +46,23 @@ export class AuthController {
     });
 
     return { message: "Usuario loggeado exitosamente" };
+  }
+
+  @ApiOperation({
+    summary: "Permite cerrar sesión de un usuario loggeado",
+  })
+  @ApiBearerAuth("jwt-auth")
+  @UseGuards(JwtAuthGuard) // Solo usuarios logueados
+  @Post("signout")
+  signOut(@Res({ passthrough: true }) res: Response) {
+    // Eliminamos la cookie
+    res.clearCookie("access_token", {
+      httpOnly: true,
+      secure: false, // si usas HTTPS pon true
+      sameSite: "lax",
+    });
+
+    return { message: "Sesión cerrada exitosamente" };
   }
 
   @ApiOperation({
