@@ -45,7 +45,19 @@ export class AuthController {
       maxAge: 24 * 60 * 60 * 1000,
     });
 
-    return { message: "Usuario loggeado exitosamente" };
+    return { message: "Usuario loggeado exitosamente", 
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        isAdmin: user.isAdmin,
+        phone: user.phone,
+        address: user.address,
+        profile_photo: user.profile_photo,
+        dni: user.dni,
+        birthday: user.birthday,
+      }
+     };
   }
 
   @ApiOperation({
