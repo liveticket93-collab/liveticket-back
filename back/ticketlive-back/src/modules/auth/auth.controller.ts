@@ -53,7 +53,7 @@ export class AuthController {
   })
   @ApiBearerAuth("jwt-auth")
   @UseGuards(JwtAuthGuard) // Solo usuarios logueados
-  @Post("signout")
+  @Post("/signout")
   signOut(@Res({ passthrough: true }) res: Response) {
     // Eliminamos la cookie
     res.clearCookie("access_token", {

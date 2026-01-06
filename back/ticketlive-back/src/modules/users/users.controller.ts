@@ -6,11 +6,13 @@ import {
   Get,
   UseGuards,
   Req,
+  ParseUUIDPipe,
 } from "@nestjs/common";
 import { UsersService } from "./users.service";
 import { UpdateUserDto } from "./dto/users.dto";
 import { JwtAuthGuard } from "../auth/guard/jwt-auth.guard";
 import { ApiBearerAuth } from "@nestjs/swagger";
+import { UUID } from "typeorm/driver/mongodb/bson.typings.js";
 
 @Controller("users")
 export class UsersController {
@@ -21,10 +23,10 @@ export class UsersController {
     return this.usersService.updateProfile(id, updateUserDto);
   }
 
-  @ApiBearerAuth("jwt-auth")
-  @UseGuards(JwtAuthGuard)
-  @Get("profile")
-  getProfile(@Req() req) {
-    return req.user;
+  // @ApiBearerAuth("jwt-auth")
+  // @UseGuards(JwtAuthGuard)
+  @Get("profile/:id")
+  getProfile(@Req() req, @Param("id") id: string) {
+    return this.usersService.findById(id);
   }
 }
