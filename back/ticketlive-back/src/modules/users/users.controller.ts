@@ -23,6 +23,13 @@ export class UsersController {
     return this.usersService.updateProfile(id, updateUserDto);
   }
 
+  //Necessary for the Google front-end login
+  @Get('me')
+  @UseGuards(JwtAuthGuard)
+  getMe(@Req() req) {
+    return req.user;
+  }
+
   // @ApiBearerAuth("jwt-auth")
   // @UseGuards(JwtAuthGuard)
   @Get("profile/:id")
