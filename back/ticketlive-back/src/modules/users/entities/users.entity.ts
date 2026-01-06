@@ -1,3 +1,4 @@
+import { Cart } from "src/modules/cart/entities/cart.entity";
 import { Order } from "src/modules/orders/entities/order.entity";
 import {
   Entity,
@@ -55,4 +56,8 @@ export class User {
   //Users 1:N Orders
   @OneToMany(() => Order, (order) => order.user)
   orders: Order[];
+
+  @OneToMany(() => Cart, cart => cart.user)
+  carts: Cart[];
+
 }

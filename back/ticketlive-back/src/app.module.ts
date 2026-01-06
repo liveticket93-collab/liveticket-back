@@ -9,6 +9,8 @@ import { OrdersModule } from "./modules/orders/orders.module";
 import { CategoriesModule } from "./modules/categories/categories.module";
 import { FileUploadModule } from "./modules/file-upload/file-upload.module";
 import { DatabaseModule } from "./database/seed.module";
+import { CartModule } from "./modules/cart/cart.module";
+import { PaymentModule } from "./modules/payment/payment.module";
 
 @Module({
   imports: [
@@ -24,6 +26,8 @@ import { DatabaseModule } from "./database/seed.module";
     OrdersModule,
     CategoriesModule,
     FileUploadModule,
+    CartModule,
+    PaymentModule,
     // DatabaseModule, // 👈 Solo al hacer el npm run seed caso contrario comentar
   ],
 })

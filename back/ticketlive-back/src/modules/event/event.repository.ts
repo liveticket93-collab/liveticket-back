@@ -10,7 +10,7 @@ export class EventRepository {
   constructor(
     @InjectRepository(Event)
     private readonly repository: Repository<Event>
-  ) {}
+  ) { }
 
   async getEvents(page: number, limit: number): Promise<Event[]> {
     const skip = (page - 1) * limit;
@@ -54,4 +54,11 @@ export class EventRepository {
   async save(event: Event): Promise<Event> {
     return this.repository.save(event);
   }
+
+  findById(id: string): Promise<Event | null> {
+    return this.repository.findOne({
+      where: { id },
+    });
+  }
+
 }

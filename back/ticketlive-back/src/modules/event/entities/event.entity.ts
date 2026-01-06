@@ -1,4 +1,5 @@
 import { OrderDetail } from "src/entities/orderDetails.entity";
+import { CartItem } from "src/modules/cart/entities/cart-item.entity";
 import { Category } from "src/modules/categories/entities/category.entity";
 import {
   Column,
@@ -39,7 +40,7 @@ export class Event {
   @Column()
   price: number;
 
-  @Column({ type: "varchar", length: 255 })
+  @Column({ type: "varchar", length: 255, nullable: true })
   imageUrl: string;
 
   @Column()
@@ -58,4 +59,7 @@ export class Event {
 
   @UpdateDateColumn({ name: "updated_at" })
   updated_at: Date;
+
+  @OneToMany(() => CartItem, item => item.event)
+  cartItems: CartItem[];
 }
