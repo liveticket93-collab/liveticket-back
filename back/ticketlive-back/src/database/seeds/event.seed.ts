@@ -67,7 +67,7 @@ export class EventSeed {
         location: "Teatro Principal",
         capacity: 2500,
         price: 100,
-        imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/Bad_album_logo.svg/2560px-Bad_album_logo.svg.png",
+        imageUrl: "https://images.squarespace-cdn.com/content/66a2b4e1f052404e0f9eef25/4aac2f1e-a5b8-4a39-a545-7ec441843858/Social+Sharing+Image.png?format=1500w&content-type=image%2Fpng",
         status: true,
         category: concertsCategory,
       },
