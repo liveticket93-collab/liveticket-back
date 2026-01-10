@@ -46,10 +46,11 @@ export class AuthService {
     return noPsw;
   }
 
-  async generateToken(user: { id: string; email: string }) {
+  async generateToken(user: { id: string; email: string; isAdmin: boolean }) {
     const payload = {
       sub: user.id,
       email: user.email,
+      isAdmin: user.isAdmin
     };
     return this.jwtService.sign(payload);
   }

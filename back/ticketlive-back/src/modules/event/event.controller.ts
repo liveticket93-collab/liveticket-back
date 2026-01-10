@@ -8,11 +8,17 @@ import {
   Delete,
   Query,
   ParseUUIDPipe,
+  UseGuards,
 } from "@nestjs/common";
 import { EventsService } from "./event.service";
 import { CreateEventDto } from "./dto/create-event.dto";
 import { UpdateEventDto } from "./dto/update-event.dto";
 import { Event } from "./entities/event.entity";
+import { JwtAuthGuard } from "../auth/guard/jwt-auth.guard";
+import { Roles } from "src/roles/roles.decorator";
+import { RolesGuard } from "src/roles/roles.guard";
+import { Role } from "src/roles/roles.enum";
+
 
 @Controller("events")
 export class EventsController {
@@ -32,11 +38,15 @@ export class EventsController {
   }
 
   @Post()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
   async create(@Body() createEventDto: CreateEventDto): Promise<Event> {
     return this.eventsService.create(createEventDto);
   }
 
   @Patch(":id")
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
   async update(
     @Param("id", new ParseUUIDPipe()) id: string,
     @Body() updateEventDto: UpdateEventDto
@@ -45,9 +55,12 @@ export class EventsController {
   }
 
   @Delete(":id")
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
   async remove(
     @Param("id", new ParseUUIDPipe()) id: string
   ): Promise<{ id: string }> {
     return this.eventsService.remove(id);
   }
 }
+

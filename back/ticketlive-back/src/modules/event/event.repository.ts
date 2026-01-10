@@ -14,14 +14,19 @@ export class EventRepository {
 
   async getEvents(page: number, limit: number): Promise<Event[]> {
     const skip = (page - 1) * limit;
+
     return await this.repository.find({
+      relations: { category: true },
       skip,
       take: limit,
     });
   }
 
   async getById(id: string): Promise<Event | null> {
-    return this.repository.findOneBy({ id });
+    return this.repository.findOne({
+      where: { id },
+      relations: { category: true },
+    });
   }
 
   async createEvent(createEventDto: CreateEventDto): Promise<Event> {

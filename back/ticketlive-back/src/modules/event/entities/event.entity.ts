@@ -5,6 +5,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
@@ -22,8 +23,9 @@ export class Event {
   @Column({ type: "text" })
   description: string;
 
-  @Column()
-  date: Date; // Fecha del evento (puede ser solo día o fecha completa)
+  @Column({ type: 'date' })
+  date: string;
+  // Fecha del evento (puede ser solo día o fecha completa)
 
   @Column({ type: "timestamp" })
   start_time: Date; // Hora de inicio del evento
@@ -47,8 +49,12 @@ export class Event {
   status: boolean;
 
   //Event N:1 Category
-  @ManyToOne(() => Category, (category) => category.events)
+  @ManyToOne(() => Category, (category) => category.events, { nullable: false })
+  @JoinColumn({ name: 'categoryId' })
   category: Category;
+
+  @Column({ type: 'uuid' })
+  categoryId: string;
 
   //Event 1:N Order_detail
   @OneToMany(() => OrderDetail, (detail) => detail.event)

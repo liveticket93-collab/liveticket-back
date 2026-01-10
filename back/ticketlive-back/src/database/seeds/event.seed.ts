@@ -11,7 +11,7 @@ export class EventSeed {
     private readonly eventRepository: Repository<Event>,
     @InjectRepository(Category)
     private readonly categoryRepository: Repository<Category>
-  ) {}
+  ) { }
 
   async run() {
     console.log("Seeding events...");
@@ -35,7 +35,7 @@ export class EventSeed {
       {
         title: "Concierto de Rock - The Rolling Codes",
         description: "Una noche épica de rock con The Rolling Codes.",
-        date: new Date("2026-03-15"),
+        date: "2026-03-15",
         start_time: new Date("2026-03-15T20:00:00"),
         end_time: new Date("2026-03-15T23:00:00"),
         location: "Auditorio Central",
@@ -44,11 +44,12 @@ export class EventSeed {
         imageUrl: "https://brandemia.org/contenido/subidas/2012/07/the-rolling-stones-logo.webp",
         status: true,
         category: concertsCategory,
+
       },
       {
         title: "Partido de Fútbol - Liga CodeStars",
         description: "Encuentro de la temporada entre CodeStars y DevUnited.",
-        date: new Date("2026-04-10"),
+        date: "2026-04-10",
         start_time: new Date("2026-04-10T18:00:00"),
         end_time: new Date("2026-04-10T20:30:00"),
         location: "Estadio Principal",
@@ -57,11 +58,12 @@ export class EventSeed {
         imageUrl: "https://images.mlssoccer.com/image/private/t_editorial_landscape_8_desktop_mobile/mls/ijpkzjmnm403ikmbytgg.jpg",
         status: true,
         category: sportsCategory,
+
       },
       {
         title: "Concierto de Pop - Jane Coder",
         description: "Jane Coder en vivo con todos sus éxitos.",
-        date: new Date("2026-05-05"),
+        date: "2026-05-05",
         start_time: new Date("2026-05-05T19:30:00"),
         end_time: new Date("2026-05-05T22:00:00"),
         location: "Teatro Principal",
@@ -70,8 +72,10 @@ export class EventSeed {
         imageUrl: "https://images.squarespace-cdn.com/content/66a2b4e1f052404e0f9eef25/4aac2f1e-a5b8-4a39-a545-7ec441843858/Social+Sharing+Image.png?format=1500w&content-type=image%2Fpng",
         status: true,
         category: concertsCategory,
+
       },
     ];
+
 
     for (const eventData of eventsData) {
       const existingEvent = await this.eventRepository.findOneBy({
