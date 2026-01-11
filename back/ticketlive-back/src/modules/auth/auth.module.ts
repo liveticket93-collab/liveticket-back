@@ -8,6 +8,7 @@ import { JwtModule } from "@nestjs/jwt";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { JwtStrategy } from "./strategies/jwt.strategy";
 import { jwtConfig } from "src/config/jwt";
+import { EmailModule } from "../email/email.module";
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { jwtConfig } from "src/config/jwt";
       useFactory: (configService: ConfigService) =>
         configService.get("jwt_config")!,
     }),
+    EmailModule,
   ],
   exports: [AuthService, JwtModule],
   providers: [AuthService, GoogleStrategy, JwtStrategy],

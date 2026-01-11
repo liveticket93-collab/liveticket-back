@@ -18,8 +18,9 @@ import { JwtAuthGuard } from "../auth/guard/jwt-auth.guard";
 import { Roles } from "src/roles/roles.decorator";
 import { RolesGuard } from "src/roles/roles.guard";
 import { Role } from "src/roles/roles.enum";
+import { ApiTags } from "@nestjs/swagger";
 
-
+@ApiTags("Events")
 @Controller("events")
 export class EventsController {
   constructor(private readonly eventsService: EventsService) {}
@@ -63,4 +64,3 @@ export class EventsController {
     return this.eventsService.remove(id);
   }
 }
-

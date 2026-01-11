@@ -1,11 +1,21 @@
-import { Injectable } from '@nestjs/common';
-import { CreateOrderDto } from './dto/create-order.dto';
-import { UpdateOrderDto } from './dto/update-order.dto';
+import { Injectable } from "@nestjs/common";
+import { CreateOrderDto } from "./dto/create-order.dto";
+import { UpdateOrderDto } from "./dto/update-order.dto";
+import { EmailService } from "../email/email.service";
 
 @Injectable()
 export class OrdersService {
-  create(createOrderDto: CreateOrderDto) {
-    return 'This action adds a new order';
+  constructor(private readonly emailService: EmailService) {}
+  create(userId, createOrderDto: CreateOrderDto) {
+    // const order = this.orderRepo.create({ ...dto, userId });
+    // await this.orderRepo.save(order);
+
+    // await this.emailService.sendPurchaseEmail(
+    //   order.user.email,
+    //   order.id,
+    // );
+
+    return "This action adds a new order";
   }
 
   findAll() {

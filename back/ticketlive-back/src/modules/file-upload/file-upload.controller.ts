@@ -14,9 +14,10 @@ import {
   UseInterceptors,
 } from "@nestjs/common";
 import { FileUploadService } from "./file-upload.service";
-import { ApiBody, ApiConsumes, ApiOperation } from "@nestjs/swagger";
+import { ApiBody, ApiConsumes, ApiOperation, ApiTags } from "@nestjs/swagger";
 import { FileInterceptor } from "@nestjs/platform-express";
 
+@ApiTags("File Upload")
 @Controller("file-upload")
 export class FileUploadController {
   constructor(private readonly fileUploadService: FileUploadService) {}

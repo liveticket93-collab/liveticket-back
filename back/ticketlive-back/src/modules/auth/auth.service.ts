@@ -7,12 +7,14 @@ import {
 import { UsersService } from "../users/users.service";
 import { JwtService } from "@nestjs/jwt";
 import * as bcrypt from "bcrypt";
+import { EmailService } from "../email/email.service";
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly usersService: UsersService,
-    private readonly jwtService: JwtService
+    private readonly jwtService: JwtService,
+    private readonly emailService: EmailService
   ) {}
 
   async validateGoogleUser(googleUser: {
@@ -43,6 +45,10 @@ export class AuthService {
       profile_photo: highResPhoto,
     });
     const { password, ...noPsw } = user;
+
+    // Enviar email
+    await this.emailService.sendRegisterEmail(user.email, user.name);
+
     return noPsw;
   }
 
@@ -50,7 +56,7 @@ export class AuthService {
     const payload = {
       sub: user.id,
       email: user.email,
-      isAdmin: user.isAdmin
+      isAdmin: user.isAdmin,
     };
     return this.jwtService.sign(payload);
   }
@@ -88,6 +94,10 @@ export class AuthService {
     }
 
     const { password, ...noPsw } = newUser;
+
+    // Enviar email
+    await this.emailService.sendRegisterEmail(user.email, user.name);
+
     return noPsw;
   }
 }

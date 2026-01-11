@@ -11,9 +11,10 @@ import {
 import { UsersService } from "./users.service";
 import { UpdateUserDto } from "./dto/users.dto";
 import { JwtAuthGuard } from "../auth/guard/jwt-auth.guard";
-import { ApiBearerAuth } from "@nestjs/swagger";
+import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 import { UUID } from "typeorm/driver/mongodb/bson.typings.js";
 
+@ApiTags("Users")
 @Controller("users")
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
@@ -24,7 +25,7 @@ export class UsersController {
   }
 
   //Necessary for the Google front-end login
-  @Get('me')
+  @Get("me")
   @UseGuards(JwtAuthGuard)
   getMe(@Req() req) {
     return req.user;

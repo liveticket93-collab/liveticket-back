@@ -11,10 +11,15 @@ import { FileUploadModule } from "./modules/file-upload/file-upload.module";
 import { DatabaseModule } from "./database/seed.module";
 import { CartModule } from "./modules/cart/cart.module";
 import { PaymentModule } from "./modules/payment/payment.module";
+import { EmailModule } from "./modules/email/email.module";
+import { mailerConfig } from "./config/nodemail";
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true, load: [typeOrmConfig] }),
+    ConfigModule.forRoot({
+      isGlobal: true,
+      load: [typeOrmConfig, mailerConfig],
+    }),
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService) =>
@@ -28,7 +33,8 @@ import { PaymentModule } from "./modules/payment/payment.module";
     FileUploadModule,
     CartModule,
     PaymentModule,
-    // DatabaseModule, // 👈 Solo al hacer el npm run seed caso contrario comentar
+    DatabaseModule,
+    EmailModule, // 👈 Solo al hacer el npm run seed caso contrario comentar
   ],
 })
 export class AppModule {}
