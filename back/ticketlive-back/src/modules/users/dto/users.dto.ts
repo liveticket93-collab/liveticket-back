@@ -1,4 +1,4 @@
-import { ApiProperty, PickType } from "@nestjs/swagger";
+import { ApiProperty, OmitType, PartialType, PickType } from "@nestjs/swagger";
 import {
   IsOptional,
   IsString,
@@ -107,16 +107,17 @@ export class CreateUserDto extends PickType(UserBaseDto, [
   "confirmPassword",
   "address",
   "phone",
-] as const) {}
+] as const) { }
 
 export class LoginUserDto extends PickType(UserBaseDto, [
   "email",
   "password",
-] as const) {}
+] as const) { }
 
-export class UpdateUserDto extends PickType(UserBaseDto, [
-  "profile_photo",
-] as const) {
+export class UpdateUserDto extends PartialType(
+  OmitType(UserBaseDto, ["password", "confirmPassword"] as const),
+) {
+
   @IsOptional()
   @IsString()
   profile_photo_id?: string;

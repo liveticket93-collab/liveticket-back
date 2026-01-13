@@ -16,7 +16,6 @@ export class EventRepository {
     const skip = (page - 1) * limit;
 
     return await this.repository.find({
-      relations: { category: true },
       skip,
       take: limit,
     });

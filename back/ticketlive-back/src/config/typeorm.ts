@@ -13,7 +13,7 @@ const config = {
   database: process.env.DB_NAME,
   entities: ["dist/**/*.entity{.ts,.js}"],
   autoLoadEntities: true,
-  synchronize: true,
+  synchronize: false,
 };
 
 // Exportar para NestJS ConfigModule
