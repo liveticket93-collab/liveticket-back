@@ -7,11 +7,18 @@ import {
   UseGuards,
   Req,
   ParseUUIDPipe,
+  Query,
+  Delete,
 } from "@nestjs/common";
 import { UsersService } from "./users.service";
 import { UpdateUserDto } from "./dto/users.dto";
 import { JwtAuthGuard } from "../auth/guard/jwt-auth.guard";
-import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiQuery,
+  ApiTags,
+} from "@nestjs/swagger";
 import { UUID } from "typeorm/driver/mongodb/bson.typings.js";
 
 @ApiTags("Users")
@@ -19,9 +26,38 @@ import { UUID } from "typeorm/driver/mongodb/bson.typings.js";
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @Patch(":id")
-  updateProfile(@Param("id") id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.updateProfile(id, updateUserDto);
+  @ApiOperation({
+    summary: "Permite obtener todos los usuarios",
+  })
+  @ApiQuery({
+    name: "page",
+    required: false,
+    type: String,
+    description: "Número de página",
+  })
+  @ApiQuery({
+    name: "limit",
+    required: false,
+    type: String,
+    description: "Elementos por página",
+  })
+  @Get()
+  getAllUsers(@Query("page") page: string, @Query("limit") limit: string) {
+    const pageNum = Number(page);
+    const limitNum = Number(limit);
+    const validPage = !isNaN(pageNum) && pageNum > 0 ? pageNum : 1;
+    const validlimit = !isNaN(limitNum) && limitNum > 0 ? limitNum : 5;
+    return this.usersService.getAllUsers(validPage, validlimit);
+  }
+
+  // @ApiBearerAuth("jwt-auth")
+  // @UseGuards(JwtAuthGuard)
+  @ApiOperation({
+    summary: "Permite obtener toda la información referente a un usuario",
+  })
+  @Get("profile/:id")
+  getProfile(@Req() req, @Param("id") id: string) {
+    return this.usersService.findById(id);
   }
 
   //Necessary for the Google front-end login
@@ -31,10 +67,13 @@ export class UsersController {
     return req.user;
   }
 
-  // @ApiBearerAuth("jwt-auth")
-  // @UseGuards(JwtAuthGuard)
-  @Get("profile/:id")
-  getProfile(@Req() req, @Param("id") id: string) {
-    return this.usersService.findById(id);
+  @Patch(":id")
+  updateProfile(@Param("id") id: string, @Body() updateUserDto: UpdateUserDto) {
+    return this.usersService.updateProfile(id, updateUserDto);
+  }
+
+  @Delete(":id")
+  deleteUser(@Param("id", ParseUUIDPipe) id: string) {
+    return this.usersService.deleteUser(id);
   }
 }

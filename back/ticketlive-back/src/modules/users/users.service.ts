@@ -12,6 +12,10 @@ export class UsersService {
     return this.usersRepository.createUser(data);
   }
 
+  getAllUsers(page, limit) {
+    return this.usersRepository.getAllUsers(page, limit);
+  }
+
   findByGoogleId(googleId: string) {
     return this.usersRepository.findByGoogleId(googleId);
   }
@@ -26,5 +30,9 @@ export class UsersService {
 
   updateProfile(id: string, updateUserDto: UpdateUserDto) {
     return this.usersRepository.updateUser(id, updateUserDto);
+  }
+
+  deleteUser(id: string) {
+    return this.usersRepository.deleteUser(id);
   }
 }
