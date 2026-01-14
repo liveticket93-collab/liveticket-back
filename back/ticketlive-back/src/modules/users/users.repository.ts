@@ -24,6 +24,15 @@ export class UsersRepository {
     return await this.repo.save(user);
   }
 
+  async getAlll(page: number, limit: number): Promise<User[]> {
+    const skip = (page - 1) * limit;
+
+    return await this.repo.find({
+      skip,
+      take: limit,
+    });
+  }
+
   async findByGoogleId(googleId: string) {
     const user = await this.repo.findOne({
       where: { googleId },

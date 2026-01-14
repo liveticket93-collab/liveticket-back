@@ -8,7 +8,7 @@ import {
   Req,
   ParseUUIDPipe,
   Query,
-  Delete,
+  Delete
 } from "@nestjs/common";
 import { UsersService } from "./users.service";
 import { UpdateUserDto } from "./dto/users.dto";
@@ -20,6 +20,8 @@ import {
   ApiTags,
 } from "@nestjs/swagger";
 import { UUID } from "typeorm/driver/mongodb/bson.typings.js";
+import { User } from "./entities/users.entity";
+
 
 @ApiTags("Users")
 @Controller("users")

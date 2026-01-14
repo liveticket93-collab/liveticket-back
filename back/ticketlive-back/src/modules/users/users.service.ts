@@ -5,7 +5,7 @@ import { UpdateUserDto } from "./dto/users.dto";
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly usersRepository: UsersRepository) {}
+  constructor(private readonly usersRepository: UsersRepository) { }
 
   ///Metodos
   createUser(data: Partial<User>) {
