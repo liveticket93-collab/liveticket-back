@@ -17,7 +17,7 @@ export class UsersRepository {
       take: limit,
       skip: skip,
     });
-    return userList.map(({ password, isAdmin, ...noPassword }) => noPassword);
+    return userList.map(({ password, ...noPassword }) => noPassword);
   }
 
   async createUser(data: Partial<User>) {
