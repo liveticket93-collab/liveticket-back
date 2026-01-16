@@ -98,6 +98,7 @@ export class UserBaseDto {
   @IsOptional()
   @IsDateString()
   birthday?: Date;
+
 }
 
 export class CreateUserDto extends PickType(UserBaseDto, [
@@ -121,4 +122,11 @@ export class UpdateUserDto extends PartialType(
   @IsOptional()
   @IsString()
   profile_photo_id?: string;
+}
+
+export class BanUserDto {
+  @IsOptional()
+  @IsString()
+  @Length(1, 500)
+  reason?: string;
 }

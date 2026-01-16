@@ -35,4 +35,34 @@ export class UsersService {
   deleteUser(id: string) {
     return this.usersRepository.deleteUser(id);
   }
+
+  async banUser(id: string, reason?: string) {
+    const user = await this.usersRepository.banUser(id, reason);
+
+    if (!user) {
+      throw new NotFoundException('Usuario no encontrado');
+    }
+
+    return {
+      id: user.id,
+      isActive: user.isActive,
+      bannedAt: user.bannedAt,
+      banReason: user.banReason,
+    };
+  }
+
+  async unbanUser(id: string) {
+    const user = await this.usersRepository.unbanUser(id);
+
+    if (!user) {
+      throw new NotFoundException('Usuario no encontrado');
+    }
+
+    return {
+      id: user.id,
+      isActive: user.isActive,
+      bannedAt: user.bannedAt,
+      banReason: user.banReason,
+    };
+  }
 }

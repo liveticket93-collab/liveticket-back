@@ -47,6 +47,15 @@ export class User {
   @Column({ default: false })
   isAdmin: boolean;
 
+  @Column({ default: true })
+  isActive: boolean;
+
+  @Column({ type: 'timestamptz', nullable: true })
+  bannedAt: Date | null;
+
+  @Column({ type: 'text', nullable: true })
+  banReason: string | null;
+
   @CreateDateColumn({ type: "date", name: "created_at" })
   createdAt: Date;
 

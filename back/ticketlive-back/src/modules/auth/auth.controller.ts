@@ -28,6 +28,7 @@ export class AuthController {
     summary: "Permite el loggin de un usuario mediante email y password",
   })
   @Post("/signin")
+  @UseGuards(JwtAuthGuard)
   async signIn(
     @Body() credential: LoginUserDto,
     @Res({ passthrough: true }) res

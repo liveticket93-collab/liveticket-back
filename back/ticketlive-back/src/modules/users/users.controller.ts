@@ -11,7 +11,7 @@ import {
   Delete
 } from "@nestjs/common";
 import { UsersService } from "./users.service";
-import { UpdateUserDto } from "./dto/users.dto";
+import { BanUserDto, UpdateUserDto } from "./dto/users.dto";
 import { JwtAuthGuard } from "../auth/guard/jwt-auth.guard";
 import {
   ApiBearerAuth,
@@ -21,6 +21,9 @@ import {
 } from "@nestjs/swagger";
 import { UUID } from "typeorm/driver/mongodb/bson.typings.js";
 import { User } from "./entities/users.entity";
+import { RolesGuard } from "src/roles/roles.guard";
+import { Roles } from "src/roles/roles.decorator";
+import { Role } from "src/roles/roles.enum";
 
 
 @ApiTags("Users")
@@ -77,5 +80,19 @@ export class UsersController {
   @Delete(":id")
   deleteUser(@Param("id", ParseUUIDPipe) id: string) {
     return this.usersService.deleteUser(id);
+  }
+
+  @Patch(':id/ban')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN) 
+  banUser(@Param('id') id: string, @Body() dto: BanUserDto) {
+    return this.usersService.banUser(id, dto.reason);
+  }
+
+  @Patch(':id/unban')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  unbanUser(@Param('id') id: string) {
+    return this.usersService.unbanUser(id);
   }
 }

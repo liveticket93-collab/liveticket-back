@@ -7,8 +7,9 @@ import { InjectRepository } from "@nestjs/typeorm";
 @Injectable()
 export class UsersRepository {
   constructor(
-    @InjectRepository(User) private readonly repo: Repository<User>
-  ) {}
+    @InjectRepository(User)
+    private readonly repo: Repository<User>
+  ) { }
 
   async getAllUsers(page, limit) {
     const skip = (page - 1) * limit;
@@ -45,15 +46,10 @@ export class UsersRepository {
   }
 
   async findByEmail(email: string) {
-    const user = await this.repo.findOne({
+    return this.repo.findOne({
       where: { email },
       relations: { orders: { order_detail: { event: true } } },
     });
-    if (!user)
-      throw new NotFoundException(`Usuario con id ${email} no encontrado`);
-    // const { password, isAdmin, ...userWithoutPassword } = user;
-    // return userWithoutPassword;
-    return user;
   }
 
   async findById(id: string) {
@@ -63,7 +59,7 @@ export class UsersRepository {
     });
     if (!user)
       throw new NotFoundException(`Usuario con id ${id} no encontrado`);
-    const { password, isAdmin, ...userWithoutPassword } = user;
+    const { password, ...userWithoutPassword } = user;
     return userWithoutPassword;
   }
 
@@ -88,5 +84,27 @@ export class UsersRepository {
   async getUserByEmail(email: string): Promise<User | null> {
     const user = await this.repo.findOneBy({ email });
     return user;
+  }
+
+  async banUser(id: string, reason?: string): Promise<User | null> {
+    const user = await this.findById(id);
+    if (!user) return null;
+
+    user.isActive = false;
+    user.bannedAt = new Date();
+    user.banReason = reason ?? null;
+
+    return this.repo.save(user);
+  }
+
+  async unbanUser(id: string): Promise<User | null> {
+    const user = await this.findById(id);
+    if (!user) return null;
+
+    user.isActive = true;
+    user.bannedAt = null;
+    user.banReason = null;
+
+    return this.repo.save(user);
   }
 }
