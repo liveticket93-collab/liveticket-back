@@ -32,8 +32,8 @@ export class UsersService {
     return this.usersRepository.updateUser(id, updateUserDto);
   }
 
-  deleteUser(id: string) {
-    return this.usersRepository.deleteUser(id);
+  async deleteUser(id: string) {
+    return await this.usersRepository.deleteUser(id);
   }
 
   async banUser(id: string, reason?: string) {

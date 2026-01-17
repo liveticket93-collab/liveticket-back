@@ -42,7 +42,7 @@ export class Cart {
     @UpdateDateColumn()
     updatedAt: Date;
 
-    @ManyToOne(() => User, user => user.carts, { eager: true })
+    @ManyToOne(() => User, user => user.carts, { eager: true, onDelete: "CASCADE" })
     user: User;
 
     @OneToMany(() => CartItem, item => item.cart, {
