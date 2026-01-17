@@ -11,7 +11,7 @@ export class EventSeed {
     private readonly eventRepository: Repository<Event>,
     @InjectRepository(Category)
     private readonly categoryRepository: Repository<Category>
-  ) {}
+  ) { }
 
   async run() {
     console.log("Seeding events...");
@@ -40,6 +40,8 @@ export class EventSeed {
         start_time: new Date("2026-03-15T20:00:00"),
         end_time: new Date("2026-03-15T23:00:00"),
         location: "Auditorio Central",
+        latitude: 4.6486,
+        longitude: -74.0648,
         capacity: 5000,
         price: 120,
         imageUrl:
@@ -55,6 +57,8 @@ export class EventSeed {
         start_time: new Date("2026-04-10T18:00:00"),
         end_time: new Date("2026-04-10T20:30:00"),
         location: "Estadio Principal",
+        latitude: 6.2569,
+        longitude: -75.5906,
         capacity: 30000,
         price: 80,
         imageUrl:
@@ -70,6 +74,8 @@ export class EventSeed {
         start_time: new Date("2026-05-05T19:30:00"),
         end_time: new Date("2026-05-05T22:00:00"),
         location: "Teatro Principal",
+        latitude: 4.7100,
+        longitude: -74.0721,
         capacity: 2500,
         price: 100,
         imageUrl:
@@ -88,10 +94,18 @@ export class EventSeed {
         await this.eventRepository.save(event);
         console.log(`Event "${event.title}" created`);
       } else {
-        console.log(`Event "${eventData.title}" already exists`);
+        if (existingEvent.latitude == null || existingEvent.longitude == null) {
+          await this.eventRepository.update(existingEvent.id, {
+            latitude: eventData.latitude,
+            longitude: eventData.longitude,
+          });
+          console.log(`Event "${eventData.title}" updated with coordinates`);
+        }
+        else {
+          console.log(`Event "${eventData.title}" already exists`);
+        }
       }
     }
-
     console.log("Events seeding finished!");
   }
 }

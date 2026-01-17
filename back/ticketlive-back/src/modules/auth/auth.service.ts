@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -15,7 +16,7 @@ export class AuthService {
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
     private readonly emailService: EmailService
-  ) {}
+  ) { }
 
   async validateGoogleUser(googleUser: {
     googleId: string;
@@ -71,6 +72,10 @@ export class AuthService {
     const passwordValid = await bcrypt.compare(password, user.password!);
     if (!user || !passwordValid)
       throw new UnauthorizedException("Credenciales incorrectas");
+
+    if (!user.isActive) {
+      throw new ForbiddenException("Usuario baneado");
+    }
 
     const { password: _, ...noPsw } = user;
 

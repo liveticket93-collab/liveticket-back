@@ -19,23 +19,23 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: any) {
-  const userId = payload.sub;
+    const userId = payload.sub;
 
-  const user = await this.usersRepository.findById(userId); 
+    const user = await this.usersRepository.findById(userId);
 
-  if (!user) {
-    throw new UnauthorizedException('Usuario no existe');
+    if (!user) {
+      throw new UnauthorizedException('Usuario no existe');
+    }
+
+    if (!user.isActive) {
+      throw new ForbiddenException('Usuario baneado');
+    }
+
+    return {
+      id: user.id,
+      email: user.email,
+      isAdmin: user.isAdmin,
+    };
   }
-
-  if (!user.isActive) {
-    throw new ForbiddenException('Usuario baneado');
-  }
-
-  return {
-    id: user.id,
-    email: user.email,
-    isAdmin: user.isAdmin, 
-  };
-}
 
 }
