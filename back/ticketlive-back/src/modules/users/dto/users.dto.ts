@@ -98,7 +98,6 @@ export class UserBaseDto {
   @IsOptional()
   @IsDateString()
   birthday?: Date;
-
 }
 
 export class CreateUserDto extends PickType(UserBaseDto, [
@@ -108,23 +107,27 @@ export class CreateUserDto extends PickType(UserBaseDto, [
   "confirmPassword",
   "address",
   "phone",
-] as const) { }
+] as const) {}
 
 export class LoginUserDto extends PickType(UserBaseDto, [
   "email",
   "password",
-] as const) { }
+] as const) {}
 
 export class UpdateUserDto extends PartialType(
-  OmitType(UserBaseDto, ["password", "confirmPassword"] as const),
+  OmitType(UserBaseDto, ["password", "confirmPassword"] as const)
 ) {
-
   @IsOptional()
   @IsString()
+  @IsUrl()
   profile_photo_id?: string;
 }
 
 export class BanUserDto {
+  @ApiProperty({
+    description: "Razón por la cual se banea el usuario",
+    example: "Comentarios inapropiados",
+  })
   @IsOptional()
   @IsString()
   @Length(1, 500)

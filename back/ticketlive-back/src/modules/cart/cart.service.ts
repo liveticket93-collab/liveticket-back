@@ -1,147 +1,136 @@
-import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
-import { Cart } from './entities/cart.entity';
-import { User } from '../users/entities/users.entity';
-import { EventRepository } from '../event/event.repository';
-import { CartRepository } from './repositories/cart.repository';
-import { CartItemRepository } from './repositories/cart-item.repository';
-import { CartPaymentService } from '../payment/payments.service';
-
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from "@nestjs/common";
+import { Cart } from "./entities/cart.entity";
+import { User } from "../users/entities/users.entity";
+import { EventRepository } from "../event/event.repository";
+import { CartRepository } from "./repositories/cart.repository";
+import { CartItemRepository } from "./repositories/cart-item.repository";
 
 @Injectable()
 export class CartService {
-    constructor(
-        private readonly cartRepository: CartRepository,
-        private readonly cartItemRepository: CartItemRepository,
-        private readonly eventRepository: EventRepository,
+  constructor(
+    private readonly cartRepository: CartRepository,
+    private readonly cartItemRepository: CartItemRepository,
+    private readonly eventRepository: EventRepository
+  ) {}
 
-    ) { }
+  async getOrCreateActiveCart(user: User): Promise<Cart> {
+    let cart = await this.cartRepository.findActiveCartByUserId(user.id);
 
-    async getOrCreateActiveCart(user: User): Promise<Cart> {
-        let cart = await this.cartRepository.findActiveCartByUserId(user.id);
-
-        if (!cart) {
-            cart = await this.cartRepository.createCart(user.id);
-        }
-
-        return cart;
+    if (!cart) {
+      cart = await this.cartRepository.createCart(user.id);
     }
 
-    async getCartByUser(userId: string): Promise<Cart | null> {
-        return this.cartRepository.findActiveCartByUserId(userId);
+    return cart;
+  }
+
+  async getCartByUser(userId: string): Promise<Cart | null> {
+    return this.cartRepository.findActiveCartByUserId(userId);
+  }
+
+  async addItemToCart(
+    user: User,
+    eventId: string,
+    quantity: number
+  ): Promise<Cart> {
+    if (quantity <= 0) {
+      throw new BadRequestException("Cantidad inválida");
     }
 
-    async addItemToCart(
-        user: User,
-        eventId: string,
-        quantity: number,
-    ): Promise<Cart> {
-        if (quantity <= 0) {
-            throw new BadRequestException('Cantidad inválida');
-        }
+    const cart = await this.getOrCreateActiveCart(user);
 
-        const cart = await this.getOrCreateActiveCart(user);
-
-        const event = await this.eventRepository.findById(eventId);
-        if (!event) {
-            throw new NotFoundException('Evento no encontrado');
-        }
-
-        const existingItem =
-            await this.cartItemRepository.findByCartAndEvent(
-                cart.id,
-                event.id,
-            );
-
-        if (existingItem) {
-            existingItem.quantity += quantity;
-            existingItem.subtotal = Number(existingItem.unitPrice) * existingItem.quantity;
-            await this.cartItemRepository.save(existingItem);
-
-        } else {
-            const newItem = this.cartItemRepository.create({
-                cart,
-                event,
-                quantity,
-                unitPrice: event.price,
-                subtotal: quantity * event.price,
-            });
-
-            await this.cartItemRepository.save(newItem);
-        }
-
-        await this.recalculateCartTotal(cart.id);
-
-        const updatedCart =
-            await this.cartRepository.findByIdWithItems(cart.id);
-
-        if (!updatedCart) {
-            throw new InternalServerErrorException(
-                'No se pudo recuperar el carrito actualizado',
-            );
-        }
-
-        return updatedCart;
+    const event = await this.eventRepository.findById(eventId);
+    if (!event) {
+      throw new NotFoundException("Evento no encontrado");
     }
 
-    async removeItemFromCart(
-        user: User,
-        cartItemId: string,
-    ): Promise<Cart> {
-        const cart = await this.getOrCreateActiveCart(user);
+    const existingItem = await this.cartItemRepository.findByCartAndEvent(
+      cart.id,
+      event.id
+    );
 
-        const item = await this.cartItemRepository.findById(cartItemId);
-        if (!item || item.cart.id !== cart.id) {
-            throw new NotFoundException('Item no encontrado en el carrito');
-        }
+    if (existingItem) {
+      existingItem.quantity += quantity;
+      existingItem.subtotal =
+        Number(existingItem.unitPrice) * existingItem.quantity;
+      await this.cartItemRepository.save(existingItem);
+    } else {
+      const newItem = this.cartItemRepository.create({
+        cart,
+        event,
+        quantity,
+        unitPrice: event.price,
+        subtotal: quantity * event.price,
+      });
 
-        await this.cartItemRepository.remove(item);
-        await this.recalculateCartTotal(cart.id);
-
-        const updatedCart =
-            await this.cartRepository.findByIdWithItems(cart.id);
-
-        if (!updatedCart) {
-            throw new InternalServerErrorException(
-                'No se pudo recuperar el carrito actualizado',
-            );
-        }
-
-        return updatedCart;
+      await this.cartItemRepository.save(newItem);
     }
 
-    async clearCart(user: User): Promise<Cart> {
-        const cart = await this.getOrCreateActiveCart(user);
+    await this.recalculateCartTotal(cart.id);
 
-        const items = await this.cartItemRepository.findByCartId(cart.id);
-        for (const item of items) {
-            await this.cartItemRepository.remove(item);
-        }
+    const updatedCart = await this.cartRepository.findByIdWithItems(cart.id);
 
-        await this.recalculateCartTotal(cart.id);
-
-        const updatedCart =
-            await this.cartRepository.findByIdWithItems(cart.id);
-
-        if (!updatedCart) {
-            throw new InternalServerErrorException(
-                'No se pudo recuperar el carrito limpio',
-            );
-        }
-
-        return updatedCart;
+    if (!updatedCart) {
+      throw new InternalServerErrorException(
+        "No se pudo recuperar el carrito actualizado"
+      );
     }
 
+    return updatedCart;
+  }
 
-    private async recalculateCartTotal(cartId: string): Promise<void> {
-        const items =
-            await this.cartItemRepository.findByCartId(cartId);
+  async removeItemFromCart(user: User, cartItemId: string): Promise<Cart> {
+    const cart = await this.getOrCreateActiveCart(user);
 
-        const total = items.reduce(
-            (sum, item) => sum + item.subtotal,
-            0,
-        );
-
-        await this.cartRepository.updateTotal(cartId, total);
+    const item = await this.cartItemRepository.findById(cartItemId);
+    if (!item || item.cart.id !== cart.id) {
+      throw new NotFoundException("Item no encontrado en el carrito");
     }
+
+    await this.cartItemRepository.remove(item);
+    await this.recalculateCartTotal(cart.id);
+
+    const updatedCart = await this.cartRepository.findByIdWithItems(cart.id);
+
+    if (!updatedCart) {
+      throw new InternalServerErrorException(
+        "No se pudo recuperar el carrito actualizado"
+      );
+    }
+
+    return updatedCart;
+  }
+
+  async clearCart(user: User): Promise<Cart> {
+    const cart = await this.getOrCreateActiveCart(user);
+
+    const items = await this.cartItemRepository.findByCartId(cart.id);
+    for (const item of items) {
+      await this.cartItemRepository.remove(item);
+    }
+
+    await this.recalculateCartTotal(cart.id);
+
+    const updatedCart = await this.cartRepository.findByIdWithItems(cart.id);
+
+    if (!updatedCart) {
+      throw new InternalServerErrorException(
+        "No se pudo recuperar el carrito limpio"
+      );
+    }
+
+    return updatedCart;
+  }
+
+  private async recalculateCartTotal(cartId: string): Promise<void> {
+    const items = await this.cartItemRepository.findByCartId(cartId);
+
+    const total = items.reduce((sum, item) => sum + item.subtotal, 0);
+
+    await this.cartRepository.updateTotal(cartId, total);
+  }
 }
-

@@ -8,7 +8,7 @@ import {
   Req,
   ParseUUIDPipe,
   Query,
-  Delete
+  Delete,
 } from "@nestjs/common";
 import { UsersService } from "./users.service";
 import { BanUserDto, UpdateUserDto } from "./dto/users.dto";
@@ -24,7 +24,6 @@ import { User } from "./entities/users.entity";
 import { RolesGuard } from "src/roles/roles.guard";
 import { Roles } from "src/roles/roles.decorator";
 import { Role } from "src/roles/roles.enum";
-
 
 @ApiTags("Users")
 @Controller("users")
@@ -65,34 +64,46 @@ export class UsersController {
     return this.usersService.findById(id);
   }
 
-  //Necessary for the Google front-end login
-  @Get("me")
-  @UseGuards(JwtAuthGuard)
-  getMe(@Req() req) {
-    return req.user;
-  }
+  // //Necessary for the Google front-end login
+  // @Get("me")
+  // @UseGuards(JwtAuthGuard)
+  // getMe(@Req() req) {
+  //   return req.user;
+  // }
 
+  @ApiOperation({
+    summary: "Permite actulizar los datos de un usuario",
+  })
   @Patch(":id")
   updateProfile(@Param("id") id: string, @Body() updateUserDto: UpdateUserDto) {
     return this.usersService.updateProfile(id, updateUserDto);
   }
 
+  @ApiOperation({
+    summary: "Permite eliminar un usuario por su id",
+  })
   @Delete(":id")
   deleteUser(@Param("id", ParseUUIDPipe) id: string) {
     return this.usersService.deleteUser(id);
   }
 
-  @Patch(':id/ban')
+  @ApiOperation({
+    summary: "Permite banear un usuario por su id",
+  })
+  @Patch(":id/ban")
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN) 
-  banUser(@Param('id') id: string, @Body() dto: BanUserDto) {
+  @Roles(Role.ADMIN)
+  banUser(@Param("id") id: string, @Body() dto: BanUserDto) {
     return this.usersService.banUser(id, dto.reason);
   }
 
-  @Patch(':id/unban')
+  @ApiOperation({
+    summary: "Permite desbanear un usuario por su id",
+  })
+  @Patch(":id/unban")
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
-  unbanUser(@Param('id') id: string) {
+  unbanUser(@Param("id") id: string) {
     return this.usersService.unbanUser(id);
   }
 }

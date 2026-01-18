@@ -50,11 +50,11 @@ export class User {
   @Column({ default: true })
   isActive: boolean;
 
-  @Column({ type: 'timestamptz', nullable: true })
-  bannedAt: Date | null;
+  @Column({ type: "timestamptz", nullable: true })
+  bannedAt?: Date | null;
 
-  @Column({ type: 'text', nullable: true })
-  banReason: string | null;
+  @Column({ type: "text", nullable: true })
+  banReason?: string | null;
 
   @CreateDateColumn({ type: "date", name: "created_at" })
   createdAt: Date;
@@ -66,7 +66,6 @@ export class User {
   @OneToMany(() => Order, (order) => order.user)
   orders: Order[];
 
-  @OneToMany(() => Cart, cart => cart.user)
+  @OneToMany(() => Cart, (cart) => cart.user)
   carts: Cart[];
-
 }

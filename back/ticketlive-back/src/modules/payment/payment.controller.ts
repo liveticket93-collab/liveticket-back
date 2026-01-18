@@ -3,7 +3,7 @@ import { JwtAuthGuard } from "../auth/guard/jwt-auth.guard";
 import { CartService } from "../cart/cart.service";
 import { CartPaymentService } from "./payments.service";
 import { BadRequestException } from "@nestjs/common";
-import { ApiTags } from "@nestjs/swagger";
+import { ApiOperation, ApiTags } from "@nestjs/swagger";
 
 @ApiTags("Payment")
 @Controller("payment")
@@ -14,6 +14,11 @@ export class PaymentController {
     private readonly cartPaymentService: CartPaymentService
   ) {}
 
+  @ApiOperation({
+    summary: "Genera una URL de pago para el carrito activo",
+    description:
+      "Crea una preferencia de pago en Mercado Pago con los productos del carrito del usuario autenticado y devuelve la URL de checkout.",
+  })
   @Post("checkout")
   async checkout(@Req() req) {
     const user = req.user;

@@ -8,8 +8,10 @@ import {
   Delete,
 } from "@nestjs/common";
 import { CategoriesService } from "./categories.service";
-import { CreateCategoryDto } from "./dto/create-category.dto";
-import { UpdateCategoryDto } from "./dto/update-category.dto";
+import {
+  CreateCategoryDto,
+  UpdateCategoryDto,
+} from "./dto/create-category.dto";
 import { ApiOperation, ApiTags } from "@nestjs/swagger";
 
 @ApiTags("Categories")
@@ -34,6 +36,9 @@ export class CategoriesController {
     return this.categoriesService.findOne(id);
   }
 
+  @ApiOperation({
+    summary: "Permite actulizar los datos de una categoría",
+  })
   @Patch(":id")
   update(@Param("id") id: string, @Body() categoryData: UpdateCategoryDto) {
     return this.categoriesService.update(id, categoryData);
