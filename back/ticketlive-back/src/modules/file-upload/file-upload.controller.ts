@@ -24,8 +24,7 @@ export class FileUploadController {
   constructor(
     private readonly fileUploadService: FileUploadService,
     private readonly fileUploadRepository: FileUploadRepository
-
-  ) { }
+  ) {}
 
   @ApiOperation({
     summary: "Permite almacenar una imagen de perfil de un usuario",
@@ -64,14 +63,18 @@ export class FileUploadController {
     return this.fileUploadService.uploadProfileImage(userId, file);
   }
 
-  @Post('upload')
-  @UseInterceptors(FileInterceptor('file', {
-    limits: {
-      fileSize: 5 * 1024 * 1024,
-    },
-  }))
+  @ApiOperation({
+    summary: "Permite subir un archivo de 5MB",
+  })
+  @Post("upload")
+  @UseInterceptors(
+    FileInterceptor("file", {
+      limits: {
+        fileSize: 5 * 1024 * 1024,
+      },
+    })
+  )
   uploadFile(@UploadedFile() file: Express.Multer.File) {
     return this.fileUploadRepository.uploadFile(file);
   }
-
 }

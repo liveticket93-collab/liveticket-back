@@ -4,8 +4,10 @@ import { DataSource, DataSourceOptions } from "typeorm";
 
 dotenvConfig({ path: ".env" }); // Ruta correcta a tu archivo .env
 
+const isProduction = process.env.NODE_ENV === "production";
 const config = {
   type: "postgres",
+  url: isProduction ? process.env.DATABASE_URL : false,
   host: process.env.DB_HOST,
   port: Number(process.env.DB_PORT),
   username: process.env.DB_USERNAME,
@@ -14,6 +16,7 @@ const config = {
   entities: ["dist/**/*.entity{.ts,.js}"],
   autoLoadEntities: true,
   synchronize: true,
+  ssl: isProduction ? { rejectUnauthorized: false } : false,
 };
 
 // Exportar para NestJS ConfigModule
