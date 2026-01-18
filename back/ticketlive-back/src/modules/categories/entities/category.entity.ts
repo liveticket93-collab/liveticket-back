@@ -1,5 +1,6 @@
+import { Coupon } from "src/modules/coupons/entities/coupon.entity";
 import { Event } from "src/modules/event/entities/event.entity";
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, ManyToMany, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity({
   name: "categories",
@@ -14,4 +15,7 @@ export class Category {
   //Event N:1 Category
   @OneToMany(() => Event, (event) => event.category)
   events: Event[];
+
+  @ManyToMany(() => Coupon, (coupon) => coupon.categories)
+  coupons?: Coupon[];
 }

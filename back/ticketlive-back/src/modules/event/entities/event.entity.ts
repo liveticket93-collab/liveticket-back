@@ -1,11 +1,13 @@
 import { OrderDetail } from "src/entities/orderDetails.entity";
 import { CartItem } from "src/modules/cart/entities/cart-item.entity";
 import { Category } from "src/modules/categories/entities/category.entity";
+import { Coupon } from "src/modules/coupons/entities/coupon.entity";
 import {
   Column,
   CreateDateColumn,
   Entity,
   JoinColumn,
+  ManyToMany,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
@@ -65,6 +67,9 @@ export class Event {
   //Event 1:N Order_detail
   @OneToMany(() => OrderDetail, (detail) => detail.event)
   order_details: OrderDetail[];
+
+  @ManyToMany(() => Coupon, (coupon) => coupon.events)
+  coupons?: Coupon[];
 
   @CreateDateColumn({ name: "created_at" })
   created_at: Date;

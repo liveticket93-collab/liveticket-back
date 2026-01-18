@@ -13,6 +13,7 @@ import { CartModule } from "./modules/cart/cart.module";
 import { PaymentModule } from "./modules/payment/payment.module";
 import { EmailModule } from "./modules/email/email.module";
 import { mailerConfig } from "./config/nodemail";
+import { CouponsModule } from "./modules/coupons/coupons.module";
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { mailerConfig } from "./config/nodemail";
     PaymentModule,
     DatabaseModule,
     EmailModule, // 👈 Solo al hacer el npm run seed caso contrario comentar
+    CouponsModule,
   ],
 })
 export class AppModule {}
