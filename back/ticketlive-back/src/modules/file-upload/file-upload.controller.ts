@@ -16,11 +16,16 @@ import {
 import { FileUploadService } from "./file-upload.service";
 import { ApiBody, ApiConsumes, ApiOperation, ApiTags } from "@nestjs/swagger";
 import { FileInterceptor } from "@nestjs/platform-express";
+import { FileUploadRepository } from "./file-upload.repository";
 
 @ApiTags("File Upload")
 @Controller("file-upload")
 export class FileUploadController {
-  constructor(private readonly fileUploadService: FileUploadService) {}
+  constructor(
+    private readonly fileUploadService: FileUploadService,
+    private readonly fileUploadRepository: FileUploadRepository
+
+  ) { }
 
   @ApiOperation({
     summary: "Permite almacenar una imagen de perfil de un usuario",
@@ -58,4 +63,15 @@ export class FileUploadController {
   ) {
     return this.fileUploadService.uploadProfileImage(userId, file);
   }
+
+  @Post('upload')
+  @UseInterceptors(FileInterceptor('file', {
+    limits: {
+      fileSize: 5 * 1024 * 1024,
+    },
+  }))
+  uploadFile(@UploadedFile() file: Express.Multer.File) {
+    return this.fileUploadRepository.uploadFile(file);
+  }
+
 }
