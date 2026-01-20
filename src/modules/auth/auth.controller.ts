@@ -121,9 +121,9 @@ export class AuthController {
     });
 
     return res.redirect(
-      `${this.config.get<string>("FRONT_URL")}${this.config.get<string>(
-        "FRONT_CALLBACK"
+      `${this.config.get<string>("FRONTEND_URL")}
       )}`
+      //${this.config.get<string>("FRONT_CALLBACK"
     );
   }
 }
