@@ -13,7 +13,7 @@ export class CouponsRepository {
     @InjectRepository(CouponRedemption) private readonly redemptionRepo: Repository<CouponRedemption>,
     @InjectRepository(Event) private readonly eventRepo: Repository<Event>,
     @InjectRepository(Category) private readonly categoryRepo: Repository<Category>,
-  ) {}
+  ) { }
 
   normalizeCode(code: string) {
     return (code ?? "").trim().toUpperCase();
@@ -72,7 +72,7 @@ export class CouponsRepository {
   async findAllCoupons() {
     return this.couponRepo.find({
       order: { createdAt: "DESC" },
-      relations: { events: true, categories: true }, 
+      relations: { events: true, categories: true },
     });
   }
 
@@ -108,6 +108,17 @@ export class CouponsRepository {
   findReservedByCartAndUser(cartId: string, userId: string) {
     return this.redemptionRepo.findOne({
       where: { cartId, userId, status: RedemptionStatus.RESERVED },
+    });
+  }
+
+  findReservedOrAppliedByCartAndUser(cartId: string, userId: string) {
+    return this.redemptionRepo.findOne({
+      where: {
+        cartId,
+        userId,
+        status: In([RedemptionStatus.RESERVED, RedemptionStatus.APPLIED]),
+      },
+      relations: { coupon: true },
     });
   }
 

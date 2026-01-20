@@ -39,7 +39,7 @@ export class CouponsService {
 
     const used = await this.couponsRepository.countUsedRedemptions(coupon.id);
     if (used >= coupon.maxRedemptions) {
-      await this.couponsRepository.deactivateCoupon(coupon.id); // opcional
+      await this.couponsRepository.deactivateCoupon(coupon.id); 
       throw new BadRequestException("Cupón agotado");
     }
 
@@ -64,5 +64,9 @@ export class CouponsService {
     }
 
     return Math.max(0, Math.min(coupon.value, total));
+  }
+
+  async getCouponForCart(cartId: string, userId: string) {
+    return this.couponsRepository.findReservedOrAppliedByCartAndUser(cartId, userId);
   }
 }

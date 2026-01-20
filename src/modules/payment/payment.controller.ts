@@ -4,6 +4,7 @@ import { CartService } from "../cart/cart.service";
 import { CartPaymentService } from "./payments.service";
 import { BadRequestException } from "@nestjs/common";
 import { ApiOperation, ApiTags } from "@nestjs/swagger";
+import { CouponsService } from "../coupons/coupons.service";
 
 @ApiTags("Payment")
 @Controller("payment")
@@ -11,8 +12,9 @@ import { ApiOperation, ApiTags } from "@nestjs/swagger";
 export class PaymentController {
   constructor(
     private readonly cartService: CartService,
-    private readonly cartPaymentService: CartPaymentService
-  ) {}
+    private readonly cartPaymentService: CartPaymentService,
+    private readonly couponsService: CouponsService,
+  ) { }
 
   @ApiOperation({
     summary: "Genera una URL de pago para el carrito activo",
@@ -29,12 +31,16 @@ export class PaymentController {
       throw new BadRequestException("El carrito está vacío");
     }
 
-    const checkoutUrl = await this.cartPaymentService.createPreference(cart);
+    const redemption = await this.couponsService.getCouponForCart(cart.id, user.id);
+    const coupon = redemption?.coupon ?? null;
+
+    const checkoutUrl = await this.cartPaymentService.createPreference(cart, coupon);
 
     if (!checkoutUrl) {
       throw new Error("No se pudo generar la URL de Mercado Pago");
     }
 
     return { url: checkoutUrl };
+
   }
 }

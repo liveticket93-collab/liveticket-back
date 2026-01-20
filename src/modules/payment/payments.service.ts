@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { MercadoPagoConfig, Preference } from 'mercadopago';
+import { Coupon } from '../coupons/entities/coupon.entity';
 
 @Injectable()
 export class CartPaymentService {
@@ -13,13 +14,54 @@ export class CartPaymentService {
     this.mpClient = new MercadoPagoConfig({ accessToken: token });
   }
 
-  async createPreference(cart: any) {
-    const items = cart.items.map((item) => ({
+  async createPreference(cart: any, coupon?: Coupon | null) {
+    const rawItems = cart.items.map((item) => ({
       title: item.event.title,
       unit_price: Number(item.unitPrice),
       quantity: item.quantity,
       currency_id: 'COP',
     }));
+
+    const total = rawItems.reduce(
+      (sum, it) => sum + it.unit_price * it.quantity,
+      0,
+    );
+
+    let discount = 0;
+
+    if (coupon && coupon.isActive) {
+      if (coupon.type === 'PERCENT') {
+        // value: 10 => 10%
+        discount = Math.round(total * (coupon.value / 100));
+      } else if (coupon.type === 'FIXED') {
+        // value: 20000 => $20.000
+        discount = Number(coupon.value);
+      }
+    }
+
+    discount = Math.max(0, Math.min(discount, total));
+
+    const items = rawItems.map((it) => ({ ...it }));
+
+    if (discount > 0 && total > 0) {
+      let remainingDiscount = discount;
+
+      for (let i = 0; i < items.length; i++) {
+        const it = items[i];
+        const itemTotal = it.unit_price * it.quantity;
+
+        const itemDiscount =
+          i === items.length - 1
+            ? remainingDiscount
+            : Math.round((itemTotal / total) * discount);
+
+        remainingDiscount -= itemDiscount;
+
+        const newItemTotal = Math.max(0, itemTotal - itemDiscount);
+
+        it.unit_price = Math.max(0, Math.round(newItemTotal / it.quantity));
+      }
+    }
 
     const preferenceData = {
       items,
@@ -30,11 +72,11 @@ export class CartPaymentService {
       },
     };
 
-    
     const preference = await new Preference(this.mpClient).create({
       body: preferenceData,
     });
 
     return preference.init_point;
   }
+
 }
