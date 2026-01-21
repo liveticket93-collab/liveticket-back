@@ -5,6 +5,7 @@ import { Coupon, CouponType } from "./entities/coupon.entity";
 import { CouponRedemption, RedemptionStatus } from "./entities/coupon-redemption.entity";
 import { Category } from "../categories/entities/category.entity";
 import { Event } from "../event/entities/event.entity";
+import { UpdateCouponDto } from "./dtos/update_coupon.dto";
 
 @Injectable()
 export class CouponsRepository {
@@ -129,6 +130,28 @@ export class CouponsRepository {
 
   deactivateCoupon(couponId: string) {
     return this.couponRepo.update(couponId, { isActive: false });
+  }
+
+  async updateCoupon(
+    id: string,
+    updateCoupon: UpdateCouponDto
+  ): Promise<{ id: string } | null> {
+    const result = await this.couponRepo.update(id, updateCoupon);
+    if (result.affected === 0) {
+      return null;
+    }
+
+    return { id };
+  }
+
+  async deleteCoupon(id: string): Promise<{ id: string } | null> {
+    const result = await this.couponRepo.delete(id);
+
+    if (result.affected === 0) {
+      return null;
+    }
+
+    return { id };
   }
 }
 

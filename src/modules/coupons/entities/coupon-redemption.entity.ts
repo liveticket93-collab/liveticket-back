@@ -12,7 +12,7 @@ export class CouponRedemption {
   @PrimaryGeneratedColumn("uuid")
   id: string;
 
-  @ManyToOne(() => Coupon, (c) => c.redemptions, { eager: true })
+  @ManyToOne(() => Coupon, (c) => c.redemptions, { eager: true, onDelete: 'CASCADE' })
   coupon: Coupon;
 
   @Index()

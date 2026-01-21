@@ -1,7 +1,8 @@
-import { BadRequestException, Injectable } from "@nestjs/common";
+import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import { Coupon } from "./entities/coupon.entity";
 import { CouponsRepository } from "./coupons.repository";
 import { CreateCouponDto } from "./dtos/create_coupon.dto";
+import { UpdateCouponDto } from "./dtos/update_coupon.dto";
 
 @Injectable()
 export class CouponsService {
@@ -39,7 +40,7 @@ export class CouponsService {
 
     const used = await this.couponsRepository.countUsedRedemptions(coupon.id);
     if (used >= coupon.maxRedemptions) {
-      await this.couponsRepository.deactivateCoupon(coupon.id); 
+      await this.couponsRepository.deactivateCoupon(coupon.id);
       throw new BadRequestException("Cupón agotado");
     }
 
@@ -68,5 +69,28 @@ export class CouponsService {
 
   async getCouponForCart(cartId: string, userId: string) {
     return this.couponsRepository.findReservedOrAppliedByCartAndUser(cartId, userId);
+  }
+
+  async update(
+    id: string,
+    updateCoupon: UpdateCouponDto
+  ): Promise<{ id: string }> {
+    const result = await this.couponsRepository.updateCoupon(id, updateCoupon);
+
+    if (!result) {
+      throw new NotFoundException("Coupon not found");
+    }
+
+    return result;
+  }
+
+  async remove(id: string): Promise<{ id: string }> {
+    const result = await this.couponsRepository.deleteCoupon(id);
+
+    if (!result) {
+      throw new NotFoundException("Coupon not found");
+    }
+
+    return result;
   }
 }
