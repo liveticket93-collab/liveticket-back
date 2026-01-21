@@ -3,16 +3,24 @@ import { AppModule } from "./app.module";
 import { ValidationPipe } from "@nestjs/common";
 import { LoggerMiddleware } from "./middlewares/logger.middleware";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
-// import * as dotenv from "dotenv";
 import cookieParser = require("cookie-parser");
+import { NestExpressApplication } from "@nestjs/platform-express";
 
 async function bootstrap() {
-  const production = process.env.NODE_ENV;
-  // if (production === "production") dotenv.config();
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
-  const app = await NestFactory.create(AppModule);
+  if (process.env.NODE_ENV === "production") {
+    app.set("trust proxy", 1);
+  }
+
+  const FRONTEND_URL = process.env.FRONTEND_URL || process.env.FRONT_URL;
+
+  const allowedOrigins = ["http://localhost:3005", FRONTEND_URL].filter(
+    (v): v is string => typeof v === "string"
+  );
+
   app.enableCors({
-    origin: ["http://localhost:3005", process.env.FRONTEND_URL!], //cambiar a http://localhost:3000
+    origin: allowedOrigins,
     credentials: true,
   });
 
@@ -21,15 +29,12 @@ async function bootstrap() {
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
-      // forbidNonWhitelisted: true,
       transform: true,
     })
   );
 
-  //Usa mi midleware para registrar logs
   app.use(LoggerMiddleware);
 
-  //Coonfiguración documentación
   const swaggerConfig = new DocumentBuilder()
     .setTitle("TicketLive API")
     .setDescription("API documentation JWT")
@@ -42,7 +47,7 @@ async function bootstrap() {
       },
       "jwt-auth"
     )
-    .build(); //Clase para documentacion OPENAPI 3.0
+    .build();
 
   const document = SwaggerModule.createDocument(app, swaggerConfig);
   SwaggerModule.setup("api", app, document);
@@ -53,4 +58,3 @@ async function bootstrap() {
 }
 bootstrap();
 
-//Para instalar swagger se debe utilizar npm i @nestjs/swagger --legacy-peer-deps

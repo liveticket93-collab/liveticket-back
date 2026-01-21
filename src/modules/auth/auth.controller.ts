@@ -13,7 +13,7 @@ import { ConfigService } from "@nestjs/config";
 import { CreateUserDto, LoginUserDto } from "../users/dto/users.dto";
 import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
 import { JwtAuthGuard } from "./guard/jwt-auth.guard";
-import type { Response } from "express";
+import type { Response, Request } from "express";
 import { ForgotPasswordDto } from "./dto/forgot-password.dto";
 import { ResetPasswordDto } from "./dto/reset-password.dto";
 import { ChangePasswordDto } from "./dto/change-password.dto";
@@ -24,16 +24,26 @@ export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly config: ConfigService
-  ) { }
+  ) {}
 
-  //Login register formulario
+  private getCookieOptions() {
+    const isProd = process.env.NODE_ENV === "production";
+
+    return {
+      httpOnly: true,
+      secure: isProd,                    
+      sameSite: isProd ? "none" : "lax",  
+      maxAge: 24 * 60 * 60 * 1000,
+    } as const;
+  }
+
   @ApiOperation({
     summary: "Permite el loggin de un usuario mediante email y password",
   })
   @Post("/signin")
   async signIn(
     @Body() credential: LoginUserDto,
-    @Res({ passthrough: true }) res
+    @Res({ passthrough: true }) res: Response
   ) {
     const user = await this.authService.signIn(
       credential.email,
@@ -41,12 +51,7 @@ export class AuthController {
     );
     const token = await this.authService.generateToken(user);
 
-    res.cookie("access_token", token, {
-      httpOnly: true,
-      secure: false,
-      sameSite: "lax",
-      maxAge: 24 * 60 * 60 * 1000,
-    });
+    res.cookie("access_token", token, this.getCookieOptions());
 
     return {
       message: "Usuario loggeado exitosamente",
@@ -68,14 +73,15 @@ export class AuthController {
     summary: "Permite cerrar sesión de un usuario loggeado",
   })
   @ApiBearerAuth("jwt-auth")
-  @UseGuards(JwtAuthGuard) // Solo usuarios logueados
+  @UseGuards(JwtAuthGuard)
   @Post("/signout")
   signOut(@Res({ passthrough: true }) res: Response) {
-    // Eliminamos la cookie
+    const isProd = process.env.NODE_ENV === "production";
+
     res.clearCookie("access_token", {
       httpOnly: true,
-      secure: false, // si usas HTTPS pon true
-      sameSite: "lax",
+      secure: isProd,
+      sameSite: isProd ? "none" : "lax",
     });
 
     return { message: "Sesión cerrada exitosamente" };
@@ -85,49 +91,44 @@ export class AuthController {
     summary: "Permite registrar un usuario mediante formulario",
   })
   @Post("/signup")
-  async signUp(@Body() user: CreateUserDto, @Res({ passthrough: true }) res) {
+  async signUp(
+    @Body() user: CreateUserDto,
+    @Res({ passthrough: true }) res: Response
+  ) {
     const newUser = await this.authService.signUp(user);
     const token = await this.authService.generateToken(newUser);
-    res.cookie("access_token", token, {
-      httpOnly: true,
-      secure: false,
-      sameSite: "lax",
-      maxAge: 24 * 60 * 60 * 1000,
-    });
+
+    res.cookie("access_token", token, this.getCookieOptions());
 
     return { message: "Usuario creado exitosamente", user: newUser };
   }
 
-  //Login Register con google
   @ApiOperation({
     summary:
       "Permite registrar un usuario si no consta en la base de datos o loggearlo si ya consta, utilizando google auth",
   })
   @Get("google")
   @UseGuards(AuthGuard("google"))
-  googleLogin() { }
+  googleLogin() {}
 
   @ApiOperation({
     summary: "Callback llamado por /google",
   })
   @Get("google/callback")
   @UseGuards(AuthGuard("google"))
-  async googleAuthCallback(@Req() req, @Res({ passthrough: true }) res) {
-    const user = await this.authService.validateGoogleUser(req.user);
+  async googleAuthCallback(
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response
+  ) {
+    const user = await this.authService.validateGoogleUser((req as any).user);
     const token = await this.authService.generateToken(user);
 
-    res.cookie("access_token", token, {
-      httpOnly: true,
-      secure: false,
-      sameSite: "lax",
-      maxAge: 24 * 60 * 60 * 1000,
-    });
+    res.cookie("access_token", token, this.getCookieOptions());
 
-    return res.redirect(
-      `${this.config.get<string>("FRONTEND_URL")}
-      )}`
-      //${this.config.get<string>("FRONT_CALLBACK"
-    );
+    const frontendUrl =
+      this.config.get<string>("FRONTEND_URL") || process.env.FRONT_URL || "http://localhost:3005";
+
+    return res.redirect(frontendUrl);
   }
 
   @Post("forgot-password")
@@ -135,7 +136,8 @@ export class AuthController {
     await this.authService.requestPasswordReset(dto.email);
 
     return {
-      message: "Si el correo existe, te enviaremos instrucciones para restablecer tu contraseña.",
+      message:
+        "Si el correo existe, te enviaremos instrucciones para restablecer tu contraseña.",
     };
   }
 
@@ -148,10 +150,15 @@ export class AuthController {
 
   @Post("change-password")
   @UseGuards(JwtAuthGuard)
-  async changePassword(@Req() req, @Body() dto: ChangePasswordDto) {
-    await this.authService.changePassword(req.user, dto.currentPassword, dto.newPassword);
+  async changePassword(@Req() req: any, @Body() dto: ChangePasswordDto) {
+    await this.authService.changePassword(
+      req.user,
+      dto.currentPassword,
+      dto.newPassword
+    );
 
     return { message: "Contraseña cambiada correctamente." };
   }
 }
+
 
