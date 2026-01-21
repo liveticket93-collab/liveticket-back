@@ -56,6 +56,12 @@ export class User {
   @Column({ type: "text", nullable: true })
   banReason?: string | null;
 
+  @Column({ type: "varchar", nullable: true })
+  resetPasswordTokenHash: string | null;
+
+  @Column({ type: "timestamptz", nullable: true })
+  resetPasswordExpiresAt: Date | null;
+
   @CreateDateColumn({ type: "date", name: "created_at" })
   createdAt: Date;
 

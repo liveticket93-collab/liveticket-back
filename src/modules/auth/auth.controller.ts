@@ -14,6 +14,9 @@ import { CreateUserDto, LoginUserDto } from "../users/dto/users.dto";
 import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
 import { JwtAuthGuard } from "./guard/jwt-auth.guard";
 import type { Response } from "express";
+import { ForgotPasswordDto } from "./dto/forgot-password.dto";
+import { ResetPasswordDto } from "./dto/reset-password.dto";
+import { ChangePasswordDto } from "./dto/change-password.dto";
 
 @ApiTags("Auth")
 @Controller("auth")
@@ -21,7 +24,7 @@ export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly config: ConfigService
-  ) {}
+  ) { }
 
   //Login register formulario
   @ApiOperation({
@@ -102,7 +105,7 @@ export class AuthController {
   })
   @Get("google")
   @UseGuards(AuthGuard("google"))
-  googleLogin() {}
+  googleLogin() { }
 
   @ApiOperation({
     summary: "Callback llamado por /google",
@@ -126,4 +129,29 @@ export class AuthController {
       //${this.config.get<string>("FRONT_CALLBACK"
     );
   }
+
+  @Post("forgot-password")
+  async forgotPassword(@Body() dto: ForgotPasswordDto) {
+    await this.authService.requestPasswordReset(dto.email);
+
+    return {
+      message: "Si el correo existe, te enviaremos instrucciones para restablecer tu contraseña.",
+    };
+  }
+
+  @Post("reset-password")
+  async resetPassword(@Body() dto: ResetPasswordDto) {
+    await this.authService.resetPassword(dto.token, dto.newPassword);
+
+    return { message: "Contraseña actualizada correctamente." };
+  }
+
+  @Post("change-password")
+  @UseGuards(JwtAuthGuard)
+  async changePassword(@Req() req, @Body() dto: ChangePasswordDto) {
+    await this.authService.changePassword(req.user, dto.currentPassword, dto.newPassword);
+
+    return { message: "Contraseña cambiada correctamente." };
+  }
 }
+

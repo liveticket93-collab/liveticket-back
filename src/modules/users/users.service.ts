@@ -65,4 +65,16 @@ export class UsersService {
       banReason: user.banReason,
     };
   }
+
+  updateUserFields(id: string, data: Partial<User>) {
+    return this.usersRepository.updateUser(id, data as any);
+  }
+
+  findUsersWithActiveResetToken() {
+    return this.usersRepository.findUsersWithActiveResetToken();
+  }
+
+  findByIdWithPassword(id: string) {
+    return this.usersRepository.findByIdWithPassword(id);
+  }
 }

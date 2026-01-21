@@ -9,6 +9,7 @@ import { UsersService } from "../users/users.service";
 import { JwtService } from "@nestjs/jwt";
 import * as bcrypt from "bcrypt";
 import { EmailService } from "../email/email.service";
+import * as crypto from "crypto";
 
 @Injectable()
 export class AuthService {
@@ -105,4 +106,78 @@ export class AuthService {
 
     return noPsw;
   }
+
+  async requestPasswordReset(email: string): Promise<void> {
+    const normalizedEmail = email.trim().toLowerCase();
+
+    const user = await this.usersService.findByEmail(normalizedEmail);
+
+    if (!user) return;
+
+    const resetToken = crypto.randomBytes(32).toString("hex");
+    const tokenHash = await bcrypt.hash(resetToken, 10);
+    const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
+
+    await this.usersService.updateUserFields(user.id, {
+      resetPasswordTokenHash: tokenHash,
+      resetPasswordExpiresAt: expiresAt,
+    });
+
+    const resetLink = `${process.env.FRONT_URL}/reset-password?token=${resetToken}`;
+
+    await this.emailService.sendResetPasswordEmail(user.email, user.name, resetLink);
+  }
+
+  async resetPassword(token: string, newPassword: string): Promise<void> {
+    if (!token || !newPassword) {
+      throw new BadRequestException("Token y nueva contraseña requeridos");
+    }
+
+    const candidates = await this.usersService.findUsersWithActiveResetToken();
+
+    const user = await this.findUserByMatchingResetToken(candidates, token);
+
+    if (!user) {
+      throw new BadRequestException("Token inválido o expirado");
+    }
+
+    const hashed = await bcrypt.hash(newPassword, 10);
+
+    await this.usersService.updateUserFields(user.id, {
+      password: hashed,
+      resetPasswordTokenHash: null,
+      resetPasswordExpiresAt: null,
+    });
+  }
+
+  private async findUserByMatchingResetToken(users: any[], rawToken: string) {
+    for (const u of users) {
+      if (!u.resetPasswordTokenHash) continue;
+
+      const ok = await bcrypt.compare(rawToken, u.resetPasswordTokenHash);
+      if (ok) return u;
+    }
+    return null;
+  }
+
+  async changePassword(userFromReq: any, currentPassword: string, newPassword: string): Promise<void> {
+    if (!currentPassword || !newPassword) {
+      throw new BadRequestException("Contraseña actual y nueva contraseña requeridas");
+    }
+
+    const userId = userFromReq.sub ?? userFromReq.id;
+
+    const user = await this.usersService.findByIdWithPassword(userId);
+    if (!user) throw new NotFoundException("Usuario no encontrado");
+
+    const ok = await bcrypt.compare(currentPassword, user.password!);
+    if (!ok) throw new UnauthorizedException("La contraseña actual no es correcta");
+
+    const hashed = await bcrypt.hash(newPassword, 10);
+
+    await this.usersService.updateUserFields(user.id, {
+      password: hashed,
+    });
+  }
+
 }

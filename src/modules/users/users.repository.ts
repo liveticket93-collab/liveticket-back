@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
-import { Repository } from "typeorm";
+import { Repository, IsNull, MoreThan, Not } from "typeorm";
 import { User } from "./entities/users.entity";
 import { UpdateUserDto } from "./dto/users.dto";
 import { InjectRepository } from "@nestjs/typeorm";
@@ -106,5 +106,27 @@ export class UsersRepository {
     user.banReason = null;
 
     return this.repo.save(user);
+  }
+
+  async findUsersWithActiveResetToken() {
+    return this.repo.find({
+      where: {
+        resetPasswordTokenHash: Not(IsNull()),
+        resetPasswordExpiresAt: MoreThan(new Date()),
+      },
+    });
+  }
+
+  async findByIdWithPassword(id: string) {
+    return this.repo.findOne({
+      where: { id },
+      select: [
+        "id",
+        "email",
+        "password",
+        "isActive",
+        "isAdmin",
+      ],
+    });
   }
 }
