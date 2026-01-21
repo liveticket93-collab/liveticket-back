@@ -62,7 +62,7 @@ export class CouponsController {
     summary:
       "Permite que un administrador obtenga la lista completa de cupones.",
   })
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  
   @Get()
   async getAll() {
     return this.couponsService.getAllCoupons();
