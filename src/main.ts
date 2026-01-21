@@ -11,7 +11,6 @@ async function bootstrap() {
   // if (production === "production") dotenv.config();
 
   const app = await NestFactory.create(AppModule);
-
   app.enableCors({
     origin: ["http://localhost:3005", process.env.FRONTEND_URL!], //cambiar a http://localhost:3000
     credentials: true,
