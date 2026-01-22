@@ -1,7 +1,7 @@
 import { registerAs } from "@nestjs/config";
-import { config as dotenvConfig } from "dotenv";
+// import { config as dotenvConfig } from "dotenv";
 
-dotenvConfig({ path: ".env" });
+// dotenvConfig({ path: ".env" });
 
 const config = {
   host: process.env.MAIL_HOST,
