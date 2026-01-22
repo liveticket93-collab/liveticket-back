@@ -17,6 +17,7 @@ import { EmailModule } from "./modules/email/email.module";
 import { CouponsModule } from "./modules/coupons/coupons.module";
 import { DatabaseModule } from "./database/seed.module";
 import { CommentsModule } from "./modules/comments/comments.module";
+import { SubscribersModule } from "./modules/subscribers/subscribers.module";
 
 @Module({
   imports: [
@@ -44,6 +45,7 @@ import { CommentsModule } from "./modules/comments/comments.module";
     EmailModule,
     CouponsModule,
     CommentsModule,
+    SubscribersModule,
 
     DatabaseModule, // si lo usas solo para seed, lo puedes comentar cuando no
   ],

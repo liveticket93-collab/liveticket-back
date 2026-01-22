@@ -149,9 +149,3 @@ export class AuthController {
     return req.user;
   }
 }
-<<<<<<< HEAD
-=======
-
-
-
->>>>>>> 2b61bb5af215df05dda8938b936dea0861499b23
