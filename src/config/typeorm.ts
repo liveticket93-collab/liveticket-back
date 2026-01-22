@@ -1,26 +1,51 @@
 import { registerAs } from "@nestjs/config";
-import { config as dotenvConfig } from "dotenv";
-import { DataSource, DataSourceOptions } from "typeorm";
+import { TypeOrmModuleOptions } from "@nestjs/typeorm";
+import { DataSource } from "typeorm";
 
-dotenvConfig({ path: ".env" }); // Ruta correcta a tu archivo .env
+export const typeOrmConfig = registerAs(
+  "typeorm_config",
+  (): TypeOrmModuleOptions => {
+    const dbUrl = process.env.DATABASE_URL ?? "";
 
-const isProduction = process.env.NODE_ENV === "production";
-const config = {
+    const isLocalDb =
+      dbUrl.includes("localhost") ||
+      dbUrl.includes("127.0.0.1") ||
+      process.env.DB_HOST === "localhost" ||
+      process.env.DB_HOST === "127.0.0.1";
+
+    const useUrl = !!process.env.DATABASE_URL && !isLocalDb;
+    const useSSL = useUrl;
+
+    return {
+      type: "postgres",
+      ...(useUrl
+        ? {
+            url: process.env.DATABASE_URL,
+            ssl: { rejectUnauthorized: false },
+            extra: { ssl: { rejectUnauthorized: false } },
+          }
+        : {
+            host: process.env.DB_HOST,
+            port: Number(process.env.DB_PORT),
+            username: process.env.DB_USERNAME,
+            password: String(process.env.DB_PASSWORD ?? ""), // 👈 CLAVE
+            database: process.env.DB_NAME,
+            ssl: false,
+          }),
+      autoLoadEntities: true,
+      synchronize: process.env.TYPEORM_SYNC === "true",
+    };
+  }
+);
+
+export const connectionSource = new DataSource({
   type: "postgres",
-  url: isProduction ? process.env.DATABASE_URL : false,
   host: process.env.DB_HOST,
   port: Number(process.env.DB_PORT),
   username: process.env.DB_USERNAME,
-  password: process.env.DB_PASSWORD,
+  password: String(process.env.DB_PASSWORD ?? ""),
   database: process.env.DB_NAME,
-  entities: ["dist/**/*.entity{.ts,.js}"],
-  autoLoadEntities: true,
-  synchronize: true,
-  ssl: isProduction ? { rejectUnauthorized: false } : false,
-};
-
-// Exportar para NestJS ConfigModule
-export const typeOrmConfig = registerAs("typeorm_config", () => config);
-
-// Para migraciones con TypeORM
-export const connectionSource = new DataSource(config as DataSourceOptions);
+  ssl: false,
+  entities: ["dist/**/*.entity{.js,.ts}"],
+  synchronize: false,
+});
