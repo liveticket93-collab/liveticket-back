@@ -16,7 +16,7 @@ export class CartService {
     private readonly cartRepository: CartRepository,
     private readonly cartItemRepository: CartItemRepository,
     private readonly eventRepository: EventRepository
-  ) {}
+  ) { }
 
   async getOrCreateActiveCart(user: User): Promise<Cart> {
     let cart = await this.cartRepository.findActiveCartByUserId(user.id);
@@ -55,16 +55,20 @@ export class CartService {
 
     if (existingItem) {
       existingItem.quantity += quantity;
-      existingItem.subtotal =
-        Number(existingItem.unitPrice) * existingItem.quantity;
+
+      const unit = Number(existingItem.unitPrice) || 0;
+      existingItem.subtotal = unit * existingItem.quantity;
+
       await this.cartItemRepository.save(existingItem);
     } else {
+      const price = Number((event as any).price) || 0;
+
       const newItem = this.cartItemRepository.create({
         cart,
         event,
         quantity,
-        unitPrice: event.price,
-        subtotal: quantity * event.price,
+        unitPrice: price,
+        subtotal: quantity * price,
       });
 
       await this.cartItemRepository.save(newItem);
@@ -129,8 +133,18 @@ export class CartService {
   private async recalculateCartTotal(cartId: string): Promise<void> {
     const items = await this.cartItemRepository.findByCartId(cartId);
 
-    const total = items.reduce((sum, item) => sum + item.subtotal, 0);
+    const totalNumber = items.reduce((sum, item) => {
+      const subtotal = Number(item.subtotal) || 0;
+      return sum + subtotal;
+    }, 0);
+
+    const total = Math.round(totalNumber * 100) / 100;
 
     await this.cartRepository.updateTotal(cartId, total);
   }
+
+  async getCartByIdWithItems(cartId: string): Promise<Cart | null> {
+    return this.cartRepository.findByIdWithItems(cartId);
+  }
 }
+

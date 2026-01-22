@@ -1,41 +1,54 @@
-import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { MercadoPagoConfig, Preference } from 'mercadopago';
-import { Coupon } from '../coupons/entities/coupon.entity';
+import { Injectable, BadRequestException } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import { MercadoPagoConfig, Preference } from "mercadopago";
+import { Coupon } from "../coupons/entities/coupon.entity";
 
 @Injectable()
 export class CartPaymentService {
   private mpClient: MercadoPagoConfig;
 
   constructor(private readonly configService: ConfigService) {
-    const token = this.configService.get<string>('MP_ACCESS_TOKEN');
-    if (!token) throw new Error('MP_ACCESS_TOKEN no definida');
+    const token = this.configService.get<string>("MP_ACCESS_TOKEN");
+    if (!token) throw new Error("MP_ACCESS_TOKEN no definida");
 
     this.mpClient = new MercadoPagoConfig({ accessToken: token });
   }
 
   async createPreference(cart: any, coupon?: Coupon | null) {
-    const rawItems = cart.items.map((item) => ({
-      title: item.event.title,
-      unit_price: Number(item.unitPrice),
-      quantity: item.quantity,
-      currency_id: 'COP',
-    }));
+    if (!cart?.items?.length) {
+      throw new BadRequestException("Carrito sin items");
+    }
 
-    const total = rawItems.reduce(
-      (sum, it) => sum + it.unit_price * it.quantity,
-      0,
-    );
+    const rawItems = cart.items.map((item: any) => {
+      const unit = Number(item.unitPrice);
+      const qty = Number(item.quantity);
+
+      if (!Number.isFinite(unit) || unit < 0) {
+        throw new BadRequestException("Precio inválido en carrito");
+      }
+      if (!Number.isFinite(qty) || qty <= 0) {
+        throw new BadRequestException("Cantidad inválida en carrito");
+      }
+
+      return {
+        title: item.event?.title ?? "Item",
+        unit_price: Math.round(unit), // COP entero
+        quantity: qty,
+        currency_id: "COP",
+      };
+    });
+
+    const total = rawItems.reduce((sum, it) => sum + it.unit_price * it.quantity, 0);
 
     let discount = 0;
 
     if (coupon && coupon.isActive) {
-      if (coupon.type === 'PERCENT') {
-        // value: 10 => 10%
-        discount = Math.round(total * (coupon.value / 100));
-      } else if (coupon.type === 'FIXED') {
-        // value: 20000 => $20.000
-        discount = Number(coupon.value);
+      const value = Number(coupon.value);
+
+      if (coupon.type === "PERCENT") {
+        discount = Math.round(total * (value / 100));
+      } else if (coupon.type === "FIXED") {
+        discount = Math.round(value);
       }
     }
 
@@ -66,10 +79,11 @@ export class CartPaymentService {
     const preferenceData = {
       items,
       back_urls: {
-        success: this.configService.get<string>('MP_SUCCESS_URL')!,
-        failure: this.configService.get<string>('MP_FAILURE_URL')!,
-        pending: this.configService.get<string>('MP_PENDING_URL')!,
+        success: this.configService.get<string>("MP_SUCCESS_URL")!,
+        failure: this.configService.get<string>("MP_FAILURE_URL")!,
+        pending: this.configService.get<string>("MP_PENDING_URL")!,
       },
+      // auto_return: "approved",
     };
 
     const preference = await new Preference(this.mpClient).create({
@@ -78,5 +92,4 @@ export class CartPaymentService {
 
     return preference.init_point;
   }
-
 }
