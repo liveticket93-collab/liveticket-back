@@ -20,8 +20,9 @@ export class OrderDetail {
   unit_price: number;
 
   //Event 1:N Order_detail
-  @ManyToOne(() => Event, (event) => event.order_details)
+  @ManyToOne(() => Event, (event) => event.order_details, { onDelete: "CASCADE" })
   event: Event;
+  
 
   //Order 1:1 OrderDetail
   @OneToOne(() => Order, (order) => order.order_detail)
