@@ -86,7 +86,7 @@ export class AuthController {
       process.env.FRONT_URL ||
       "http://localhost:3005";
 
-    return res.redirect(`${frontendUrl}/auth/google/success?ok=true`);
+    return res.redirect(`${frontendUrl}/auth`);
   }
 
   @Post("forgot-password")
