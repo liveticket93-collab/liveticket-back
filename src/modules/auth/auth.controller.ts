@@ -37,7 +37,6 @@ export class AuthController {
     } as const;
   }
 
-  // ---------- SIGN IN ----------
   @Post("/signin")
   async signIn(
     @Body() credential: LoginUserDto,
@@ -54,7 +53,6 @@ export class AuthController {
     return { message: "Usuario loggeado exitosamente", user };
   }
 
-  // ---------- SIGN UP ----------
   @Post("/signup")
   async signUp(
     @Body() user: CreateUserDto,
@@ -68,7 +66,6 @@ export class AuthController {
     return { message: "Usuario creado exitosamente", user: newUser };
   }
 
-  // ---------- GOOGLE ----------
   @Get("google")
   @UseGuards(AuthGuard("google"))
   googleLogin() { }
@@ -82,19 +79,14 @@ export class AuthController {
     const user = await this.authService.validateGoogleUser((req as any).user);
     const token = await this.authService.generateToken(user);
 
-    res.cookie("access_token", token, {
-      httpOnly: true,
-      secure: true,
-      sameSite: "none",
-      maxAge: 24 * 60 * 60 * 1000,
-    });
+    res.cookie("access_token", token, this.getCookieOptions());
 
     const frontendUrl =
       this.config.get<string>("FRONTEND_URL") ||
       process.env.FRONT_URL ||
       "http://localhost:3005";
 
-    return res.redirect(frontendUrl);
+    return res.redirect(`${frontendUrl}/auth/google/success?ok=true`);
   }
 
   @Post("forgot-password")
