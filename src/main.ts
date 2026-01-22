@@ -3,15 +3,23 @@ import { AppModule } from "./app.module";
 import { ValidationPipe } from "@nestjs/common";
 import { LoggerMiddleware } from "./middlewares/logger.middleware";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
-import cookieParser = require("cookie-parser");
+import cookieParser from "cookie-parser";
 import { NestExpressApplication } from "@nestjs/platform-express";
 
 async function bootstrap() {
+  // ✅ Log corto para confirmar que se cargó el .env (borra después)
+  console.log("ENV CHECK", {
+    DB_HOST: process.env.DB_HOST,
+    DB_PASSWORD_TYPE: typeof process.env.DB_PASSWORD,
+    MAIL_HOST: process.env.MAIL_HOST,
+    MAIL_PORT: process.env.MAIL_PORT,
+    NODE_ENV: process.env.NODE_ENV,
+  });
+
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
-  if (process.env.NODE_ENV === "production") {
-    app.set("trust proxy", 1);
-  }
+  // ✅ Deploy detrás de proxy (Render). No rompe local.
+  app.set("trust proxy", 1);
 
   const FRONTEND_URL = process.env.FRONTEND_URL || process.env.FRONT_URL;
 
@@ -56,5 +64,5 @@ async function bootstrap() {
   await app.listen(port);
   console.log(`🚀 Server running on http://localhost:${port}`);
 }
-bootstrap();
 
+bootstrap();

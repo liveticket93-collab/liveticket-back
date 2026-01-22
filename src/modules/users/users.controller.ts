@@ -28,7 +28,7 @@ import { Role } from "src/roles/roles.enum";
 @ApiTags("Users")
 @Controller("users")
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(private readonly usersService: UsersService) { }
 
   @ApiOperation({
     summary: "Permite obtener todos los usuarios",
@@ -68,7 +68,11 @@ export class UsersController {
   //@Get("me")
   //@UseGuards(JwtAuthGuard)
   //getMe(@Req() req) {
+<<<<<<< HEAD
   //return req.user;
+=======
+    //return req.user;
+>>>>>>> 2b61bb5af215df05dda8938b936dea0861499b23
   //}
 
   @ApiOperation({

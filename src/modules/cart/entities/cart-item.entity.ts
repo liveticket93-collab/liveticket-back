@@ -18,7 +18,7 @@ export class CartItem {
   @ManyToOne(() => Cart, cart => cart.items, { onDelete: 'CASCADE' })
   cart: Cart;
 
-  @ManyToOne(() => Event, { eager: true })
+  @ManyToOne(() => Event, (event) => event.cartItems, { onDelete: "CASCADE", eager: true })
   event: Event;
 
   @Column({ type: 'int' })

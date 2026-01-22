@@ -17,7 +17,7 @@ export class AuthService {
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
     private readonly emailService: EmailService
-  ) {}
+  ) { }
 
   async validateGoogleUser(googleUser: {
     googleId: string;
@@ -28,6 +28,7 @@ export class AuthService {
     const { googleId, email, name, photo } = googleUser;
 
     let user = await this.usersService.findByEmail(email);
+
     const highResPhoto = photo
       ? photo.slice(0, photo.lastIndexOf("=")) + "=s1000-c"
       : null;
@@ -46,10 +47,17 @@ export class AuthService {
       isAdmin: false,
       profile_photo: highResPhoto,
     });
+
     const { password, ...noPsw } = user;
 
-    // Enviar email
-    await this.emailService.sendRegisterEmail(user.email, user.name);
+    try {
+      await this.emailService.sendRegisterEmail(user.email, user.name);
+    } catch (err: any) {
+      console.error(
+        "[sendRegisterEmail][googleRegister] falló:",
+        err?.message ?? err
+      );
+    }
 
     return noPsw;
   }
@@ -79,30 +87,32 @@ export class AuthService {
     }
 
     const { password: _, ...noPsw } = user;
-
     return noPsw;
   }
 
-  async signUp(user) {
-    //Verificar que no este registrado el usuario
+  async signUp(user: any) {
     const isRegister = await this.usersService.findByEmail(user.email);
     if (isRegister)
       throw new BadRequestException("El email ya ha sido registrado");
 
-    //Hashear password
     const hashPsw = await bcrypt.hash(user.password, 10);
-    //Guardar usuario
-    await this.usersService.createUser({ ...user, password: hashPsw });
 
-    const newUser = await this.usersService.findByEmail(user.email);
-    if (!newUser) {
+    const created = await this.usersService.createUser({
+      ...user,
+      password: hashPsw,
+    });
+
+    if (!created) {
       throw new NotFoundException("No se pudo crear el usuario");
     }
 
-    const { password, ...noPsw } = newUser;
+    const { password, ...noPsw } = created;
 
-    // Enviar email
-    await this.emailService.sendRegisterEmail(user.email, user.name);
+    try {
+      await this.emailService.sendRegisterEmail(created.email, created.name);
+    } catch (err: any) {
+      console.error("[sendRegisterEmail][signUp] falló:", err?.message ?? err);
+    }
 
     return noPsw;
   }
@@ -125,11 +135,15 @@ export class AuthService {
 
     const resetLink = `${process.env.FRONT_URL}/reset-password?token=${resetToken}`;
 
-    await this.emailService.sendResetPasswordEmail(
-      user.email,
-      user.name,
-      resetLink
-    );
+    try {
+      await this.emailService.sendResetPasswordEmail(
+        user.email,
+        user.name,
+        resetLink
+      );
+    } catch (err: any) {
+      console.error("[sendResetPasswordEmail][requestPasswordReset] falló:", err?.message ?? err);
+    }
   }
 
   async resetPassword(token: string, newPassword: string): Promise<void> {
@@ -191,3 +205,4 @@ export class AuthService {
     });
   }
 }
+
