@@ -28,7 +28,7 @@ import { Role } from "src/roles/roles.enum";
 @ApiTags("Users")
 @Controller("users")
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(private readonly usersService: UsersService) { }
 
   @ApiOperation({
     summary: "Permite obtener todos los usuarios",
@@ -65,11 +65,11 @@ export class UsersController {
   }
 
   // //Necessary for the Google front-end login
-   //@Get("me")
-  //@UseGuards(JwtAuthGuard)
-  //getMe(@Req() req) {
-   //return req.user;
-  //}
+  @Get("me")
+  @UseGuards(JwtAuthGuard)
+  getMe(@Req() req) {
+    return req.user;
+  }
 
   @ApiOperation({
     summary: "Permite actulizar los datos de un usuario",
