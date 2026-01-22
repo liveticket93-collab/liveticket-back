@@ -31,8 +31,8 @@ export class AuthController {
 
     return {
       httpOnly: true,
-      secure: isProd,                    
-      sameSite: isProd ? "none" : "lax",  
+      secure: isProd,
+      sameSite: isProd ? "none" : "lax",
       maxAge: 24 * 60 * 60 * 1000,
     } as const;
   }
@@ -52,21 +52,24 @@ export class AuthController {
     const token = await this.authService.generateToken(user);
 
     res.cookie("access_token", token, this.getCookieOptions());
-
-    return {
-      message: "Usuario loggeado exitosamente",
-      user: {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        isAdmin: user.isAdmin,
-        phone: user.phone,
-        address: user.address,
-        profile_photo: user.profile_photo,
-        dni: user.dni,
-        birthday: user.birthday,
-      },
-    };
+    const frontendUrl =
+      this.config.get<string>("FRONTEND_URL") ||
+      process.env.FRONT_URL ||
+      "http://localhost:3005";
+    return res.redirect(frontendUrl);
+    // return {
+    //   message: "Usuario loggeado exitosamente",
+    //   user: {
+    //     id: user.id,
+    //     email: user.email,
+    //     name: user.name,
+    //     phone: user.phone,
+    //     address: user.address,
+    //     profile_photo: user.profile_photo,
+    //     dni: user.dni,
+    //     birthday: user.birthday,
+    //   },
+    // };
   }
 
   @ApiOperation({
@@ -84,7 +87,12 @@ export class AuthController {
       sameSite: isProd ? "none" : "lax",
     });
 
-    return { message: "Sesión cerrada exitosamente" };
+    // return { message: "Sesión cerrada exitosamente" };
+    const frontendUrl =
+      this.config.get<string>("FRONTEND_URL") ||
+      process.env.FRONT_URL ||
+      "http://localhost:3005";
+    return res.redirect(frontendUrl);
   }
 
   @ApiOperation({
@@ -126,7 +134,9 @@ export class AuthController {
     res.cookie("access_token", token, this.getCookieOptions());
 
     const frontendUrl =
-      this.config.get<string>("FRONTEND_URL") || process.env.FRONT_URL || "http://localhost:3005";
+      this.config.get<string>("FRONTEND_URL") ||
+      process.env.FRONT_URL ||
+      "http://localhost:3005";
 
     return res.redirect(frontendUrl);
   }
@@ -160,5 +170,3 @@ export class AuthController {
     return { message: "Contraseña cambiada correctamente." };
   }
 }
-
-

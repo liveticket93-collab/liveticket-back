@@ -65,10 +65,10 @@ export class UsersController {
   }
 
   // //Necessary for the Google front-end login
-   //@Get("me")
+  //@Get("me")
   //@UseGuards(JwtAuthGuard)
   //getMe(@Req() req) {
-   //return req.user;
+  //return req.user;
   //}
 
   @ApiOperation({
