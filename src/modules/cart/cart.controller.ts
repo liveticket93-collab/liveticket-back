@@ -61,7 +61,7 @@ export class CartController {
   @ApiOperation({
     summary: "Permite vaciar el carrito",
   })
-  @Delete()
+  @Delete(":id")
   async clearCart(@Req() req) {
     const user = req.user;
     return this.cartService.clearCart(user);
