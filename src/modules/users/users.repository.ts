@@ -20,10 +20,10 @@ export class UsersRepository {
     return userList.map(({ password, ...noPassword }) => noPassword);
   }
 
-  async createUser(data: Partial<User>) {
-    const user = this.repo.create(data);
-    return await this.repo.save(user);
-  }
+    async createUser(data: Partial<User>) {
+      const user = this.repo.create(data);
+      return await this.repo.save(user);
+    }
 
   async getAlll(page: number, limit: number): Promise<User[]> {
     const skip = (page - 1) * limit;
