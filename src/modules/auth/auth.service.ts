@@ -17,7 +17,7 @@ export class AuthService {
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
     private readonly emailService: EmailService
-  ) { }
+  ) {}
 
   async validateGoogleUser(googleUser: {
     googleId: string;
@@ -125,7 +125,11 @@ export class AuthService {
 
     const resetLink = `${process.env.FRONT_URL}/reset-password?token=${resetToken}`;
 
-    await this.emailService.sendResetPasswordEmail(user.email, user.name, resetLink);
+    await this.emailService.sendResetPasswordEmail(
+      user.email,
+      user.name,
+      resetLink
+    );
   }
 
   async resetPassword(token: string, newPassword: string): Promise<void> {
@@ -160,9 +164,15 @@ export class AuthService {
     return null;
   }
 
-  async changePassword(userFromReq: any, currentPassword: string, newPassword: string): Promise<void> {
+  async changePassword(
+    userFromReq: any,
+    currentPassword: string,
+    newPassword: string
+  ): Promise<void> {
     if (!currentPassword || !newPassword) {
-      throw new BadRequestException("Contraseña actual y nueva contraseña requeridas");
+      throw new BadRequestException(
+        "Contraseña actual y nueva contraseña requeridas"
+      );
     }
 
     const userId = userFromReq.sub ?? userFromReq.id;
@@ -171,7 +181,8 @@ export class AuthService {
     if (!user) throw new NotFoundException("Usuario no encontrado");
 
     const ok = await bcrypt.compare(currentPassword, user.password!);
-    if (!ok) throw new UnauthorizedException("La contraseña actual no es correcta");
+    if (!ok)
+      throw new UnauthorizedException("La contraseña actual no es correcta");
 
     const hashed = await bcrypt.hash(newPassword, 10);
 
@@ -179,5 +190,4 @@ export class AuthService {
       password: hashed,
     });
   }
-
 }
