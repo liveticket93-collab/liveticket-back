@@ -8,8 +8,8 @@ import {
 import { UsersService } from "../users/users.service";
 import { JwtService } from "@nestjs/jwt";
 import * as bcrypt from "bcrypt";
-import { EmailService } from "../email/email.service";
 import * as crypto from "crypto";
+import { EmailService } from "../email/sendgrid.service";
 
 @Injectable()
 export class AuthService {
@@ -17,7 +17,7 @@ export class AuthService {
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
     private readonly emailService: EmailService
-  ) { }
+  ) {}
 
   async validateGoogleUser(googleUser: {
     googleId: string;
@@ -52,7 +52,7 @@ export class AuthService {
 
     try {
       await this.emailService.sendRegisterEmail(user.email, user.name);
-    } catch (err: any) {
+    } catch (err) {
       console.error(
         "[sendRegisterEmail][googleRegister] falló:",
         err?.message ?? err
@@ -110,7 +110,7 @@ export class AuthService {
 
     try {
       await this.emailService.sendRegisterEmail(created.email, created.name);
-    } catch (err: any) {
+    } catch (err) {
       console.error("[sendRegisterEmail][signUp] falló:", err?.message ?? err);
     }
 
@@ -141,8 +141,11 @@ export class AuthService {
         user.name,
         resetLink
       );
-    } catch (err: any) {
-      console.error("[sendResetPasswordEmail][requestPasswordReset] falló:", err?.message ?? err);
+    } catch (err) {
+      console.error(
+        "[sendResetPasswordEmail][requestPasswordReset] falló:",
+        err?.message ?? err
+      );
     }
   }
 
@@ -205,4 +208,3 @@ export class AuthService {
     });
   }
 }
-

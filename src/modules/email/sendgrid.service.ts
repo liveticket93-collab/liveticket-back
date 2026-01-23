@@ -1,48 +1,37 @@
-/*
-import { Injectable } from "@nestjs/common";
-import * as nodemailer from "nodemailer";
-import { ConfigService } from "@nestjs/config";
+import { Injectable, Logger } from "@nestjs/common";
+import sgMail from "@sendgrid/mail";
 
 @Injectable()
 export class EmailService {
-  private transporter;
-  constructor(private config: ConfigService) {
-    const mailConfig = this.config.get("mailer_config");
+  private readonly logger = new Logger(EmailService.name);
 
-    console.log("📧 Mail config:", {
-      host: mailConfig?.host,
-      port: mailConfig?.port,
-      user: mailConfig?.auth?.user,
-      passExists: !!mailConfig?.auth?.pass,
-    });
-
-    this.transporter = nodemailer.createTransport(mailConfig);
-
-    // 🔥 ESTO ES LO IMPORTANTE
-    this.transporter.verify((error, success) => {
-      if (error) {
-        console.error("❌ SMTP ERROR:", error);
-      } else {
-        console.log("✅ SMTP listo para enviar mails");
-      }
-    });
+  constructor() {
+    sgMail.setApiKey(process.env.SENDGRID_API_KEY!);
   }
 
   async sendPurchaseEmail(email: string, orderId: string) {
-    await this.transporter.sendMail({
-      from: '"Liveticket" <no-reply@liveticket.com>',
-      to: email,
-      subject: "Compra realizada 🧾",
-      html: `<p>Tu compra #${orderId} fue exitosa</p>`,
-    });
+    try {
+      await sgMail.send({
+        to: email,
+        from: process.env.SENDGRID_FROM_EMAIL!,
+        subject: "Compra realizada",
+        html: `<p>Tu compra #${orderId} fue exitosa</p>`,
+      });
+
+      return { ok: true };
+    } catch (error) {
+      this.logger.error(error.response?.body || error);
+      throw error;
+    }
   }
 
   async sendRegisterEmail(email: string, name: string) {
-    await this.transporter.sendMail({
-      from: `"Liveticket" <${this.config.get("MAIL_USER")}>`,
-      to: email,
-      subject: "Bienvenido 🎉",
-      html: `
+    try {
+      await sgMail.send({
+        to: email,
+        from: process.env.SENDGRID_FROM_EMAIL!,
+        subject: "Bienvenido 🎉",
+        html: `
       <body style="color: aliceblue; background-color: rgb(70,70,70);">
         <h1 align="center">Hola ${name}, Bienvenido a Liveticket 🎉</h1>
         <h2 align="center">La mejor tienda de entradas a eventos online</h2>
@@ -51,23 +40,37 @@ export class EmailService {
         </p>
       </body>
     `,
-    });
+      });
+
+      return { ok: true };
+    } catch (error) {
+      this.logger.error(error.response?.body || error);
+      throw error;
+    }
   }
 
   async sendEmail(email: string, text: string) {
-    return await this.transporter.sendMail({
-      to: email,
-      subject: "Test email",
-      html: `${text}`,
-    });
+    try {
+      await sgMail.send({
+        to: email,
+        from: process.env.SENDGRID_FROM_EMAIL!,
+        subject: "Test email",
+        html: `${text}`,
+      });
+      return { ok: true };
+    } catch (error) {
+      this.logger.error(error.response?.body || error);
+      throw error;
+    }
   }
 
   async sendResetPasswordEmail(email: string, name: string, resetLink: string) {
-    await this.transporter.sendMail({
-      from: '"Liveticket" <no-reply@liveticket.com>',
-      to: email,
-      subject: "Restablecer contraseña 🔐",
-      html: `
+    try {
+      await sgMail.send({
+        from: process.env.SENDGRID_FROM_EMAIL!,
+        to: email,
+        subject: "Restablecer contraseña 🔐",
+        html: `
       <body style="background-color: rgb(70,70,70); color: aliceblue; padding: 20px;">
         <h2 align="center">Hola ${name}</h2>
         <p align="center">
@@ -97,7 +100,11 @@ export class EmailService {
         </p>
       </body>
     `,
-    });
+      });
+      return { ok: true };
+    } catch (error) {
+      this.logger.error(error.response?.body || error);
+      throw error;
+    }
   }
 }
-*/
