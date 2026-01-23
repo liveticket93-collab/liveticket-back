@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Query } from "@nestjs/common";
+import { Controller, Get, Param, Post, Query } from "@nestjs/common";
 import { ApiOperation, ApiTags } from "@nestjs/swagger";
 import { ConfigService } from "@nestjs/config";
 import { EmailService } from "./sendgrid.service";
@@ -19,6 +19,15 @@ export class EmailController {
   send_email(@Query("email") email: string, @Query("message") message: string) {
     return this.emailService.sendEmail(email, message);
   }
+
+  @Post("successPurchase/:email")
+  send_success(@Param("email") email: string) {
+    const randomCode = Math.floor(
+      1000000000 + Math.random() * 9000000000
+    ).toString();
+    return this.emailService.sendPurchaseEmail(email, randomCode);
+  }
+
   /*
   @ApiOperation({
     summary:
