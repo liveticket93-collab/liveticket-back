@@ -57,6 +57,26 @@ export class AuthController {
 
   }
 
+  @Post("/signin/api")
+  async signInApi(
+    @Body() credential: LoginUserDto,
+    @Res({ passthrough: true }) res: Response
+  ) {
+    const user = await this.authService.signIn(
+      credential.email,
+      credential.password
+    );
+    const token = await this.authService.generateToken(user);
+
+    res.cookie("access_token", token, this.getCookieOptions());
+
+    return {
+      message: "Login OK",
+      token, // opcional (ya quedó cookie)
+      user,
+    };
+  }
+
   @ApiOperation({
     summary: "Permite cerrar sesión de un usuario loggeado",
   })
