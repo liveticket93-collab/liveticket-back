@@ -19,7 +19,6 @@ export class EmailController {
   send_email(@Query("email") email: string, @Query("message") message: string) {
     return this.emailService.sendEmail(email, message);
   }
-
   /*
   @ApiOperation({
     summary:

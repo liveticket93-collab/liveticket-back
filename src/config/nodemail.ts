@@ -14,9 +14,9 @@ const config = {
   tls: {
     rejectUnauthorized: true,
   },
-  connectionTimeout: 30000,
-  greetingTimeout: 30000,
-  socketTimeout: 30000,
+  connectionTimeout: 5000,
+  greetingTimeout: 5000,
+  socketTimeout: 5000,
 };
 
 // console.log("EmailConfig:", config, typeof config.auth.pass);

@@ -19,6 +19,17 @@ export class CartPaymentService {
       throw new BadRequestException("Carrito sin items");
     }
 
+    // ✅ LOG #1: Ver el carrito REAL (lo que viene de DB)
+    console.log(
+      "🛒 CART FROM DB:",
+      cart.items.map((i: any) => ({
+        title: i.event?.title,
+        unitPrice: i.unitPrice,
+        quantity: i.quantity,
+        subtotal: i.subtotal,
+      }))
+    );
+
     const rawItems = cart.items.map((item: any) => {
       const unit = Number(item.unitPrice);
       const qty = Number(item.quantity);
@@ -39,6 +50,7 @@ export class CartPaymentService {
     });
 
     const total = rawItems.reduce((sum, it) => sum + it.unit_price * it.quantity, 0);
+    console.log("🏷️ COUPON RECEIVED IN CHECKOUT:", coupon);
 
     let discount = 0;
 
@@ -86,6 +98,9 @@ export class CartPaymentService {
       // auto_return: "approved",
     };
 
+    // ✅ LOG #2: Ver EXACTAMENTE qué le mandas a Mercado Pago
+    console.log("💳 MP ITEMS PAYLOAD:", items);
+
     const preference = await new Preference(this.mpClient).create({
       body: preferenceData,
     });
@@ -93,3 +108,4 @@ export class CartPaymentService {
     return preference.init_point;
   }
 }
+

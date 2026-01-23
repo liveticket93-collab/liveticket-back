@@ -5,6 +5,7 @@ import { LoggerMiddleware } from "./middlewares/logger.middleware";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import cookieParser from "cookie-parser";
 import { NestExpressApplication } from "@nestjs/platform-express";
+import * as express from "express";
 
 async function bootstrap() {
   // ✅ Log corto para confirmar que se cargó el .env (borra después)
@@ -17,14 +18,15 @@ async function bootstrap() {
   });
 
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
-
-  // ✅ Deploy detrás de proxy (Render). No rompe local.
   app.set("trust proxy", 1);
+
+  app.use(express.json({ limit: "10mb" }));
+  app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
   const FRONTEND_URL = process.env.FRONTEND_URL || process.env.FRONT_URL;
 
   const allowedOrigins = ["http://localhost:3005", FRONTEND_URL].filter(
-    (v): v is string => typeof v === "string"
+    (v): v is string => typeof v === "string" && v.length > 0
   );
 
   app.enableCors({
@@ -62,6 +64,7 @@ async function bootstrap() {
 
   const port = process.env.PORT || 3000;
   await app.listen(port);
+
   console.log(`🚀 Server running on http://localhost:${port}`);
 }
 

@@ -64,5 +64,4 @@ export class EventRepository {
       where: { id },
     });
   }
-
 }

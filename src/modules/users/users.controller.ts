@@ -64,13 +64,6 @@ export class UsersController {
     return this.usersService.findById(id);
   }
 
-  // //Necessary for the Google front-end login
-  //@Get("me")
-  //@UseGuards(JwtAuthGuard)
-  //getMe(@Req() req) {
-    //return req.user;
-  //}
-
   @ApiOperation({
     summary: "Permite actulizar los datos de un usuario",
   })

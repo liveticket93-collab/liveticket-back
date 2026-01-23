@@ -49,9 +49,60 @@ export class AuthController {
     const token = await this.authService.generateToken(user);
 
     res.cookie("access_token", token, this.getCookieOptions());
+    const frontendUrl =
+      this.config.get<string>("FRONTEND_URL") ||
+      process.env.FRONT_URL ||
+      "http://localhost:3005";
+    return res.redirect(frontendUrl);
 
-    return { message: "Usuario loggeado exitosamente", user };
   }
+
+  @Post("/signin/api")
+  async signInApi(
+    @Body() credential: LoginUserDto,
+    @Res({ passthrough: true }) res: Response
+  ) {
+    const user = await this.authService.signIn(
+      credential.email,
+      credential.password
+    );
+    const token = await this.authService.generateToken(user);
+
+    res.cookie("access_token", token, this.getCookieOptions());
+
+    return {
+      message: "Login OK",
+      token, // opcional (ya quedó cookie)
+      user,
+    };
+  }
+
+  @ApiOperation({
+    summary: "Permite cerrar sesión de un usuario loggeado",
+  })
+  @ApiBearerAuth("jwt-auth")
+  @UseGuards(JwtAuthGuard)
+  @Post("/signout")
+  signOut(@Res({ passthrough: true }) res: Response) {
+    const isProd = process.env.NODE_ENV === "production";
+
+    res.clearCookie("access_token", {
+      httpOnly: true,
+      secure: isProd,
+      sameSite: isProd ? "none" : "lax",
+    });
+
+    // return { message: "Sesión cerrada exitosamente" };
+    const frontendUrl =
+      this.config.get<string>("FRONTEND_URL") ||
+      process.env.FRONT_URL ||
+      "http://localhost:3005";
+    return res.redirect(frontendUrl);
+  }
+
+  @ApiOperation({
+    summary: "Permite registrar un usuario mediante formulario",
+  })
 
   @Post("/signup")
   async signUp(
@@ -118,6 +169,3 @@ export class AuthController {
     return req.user;
   }
 }
-
-
-
