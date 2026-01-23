@@ -24,16 +24,32 @@ export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly config: ConfigService
-  ) { }
+  ) {}
+
+  private isProdEnv() {
+    return process.env.NODE_ENV === "production" || !!process.env.RENDER;
+  }
 
   private getCookieOptions() {
-    const isProd = process.env.NODE_ENV === "production" || !!process.env.RENDER;
+    const isProd = this.isProdEnv();
 
     return {
       httpOnly: true,
       secure: isProd,
       sameSite: isProd ? "none" : "lax",
       maxAge: 24 * 60 * 60 * 1000,
+      path: "/", 
+    } as const;
+  }
+
+  private getClearCookieOptions() {
+    const isProd = this.isProdEnv();
+
+    return {
+      httpOnly: true,
+      secure: isProd,
+      sameSite: isProd ? "none" : "lax",
+      path: "/",
     } as const;
   }
 
@@ -49,12 +65,13 @@ export class AuthController {
     const token = await this.authService.generateToken(user);
 
     res.cookie("access_token", token, this.getCookieOptions());
+
     const frontendUrl =
       this.config.get<string>("FRONTEND_URL") ||
       process.env.FRONT_URL ||
       "http://localhost:3005";
-    return res.redirect(frontendUrl);
 
+    return res.redirect(frontendUrl);
   }
 
   @Post("/signin/api")
@@ -72,38 +89,42 @@ export class AuthController {
 
     return {
       message: "Login OK",
-      token, // opcional (ya quedó cookie)
+      token, 
       user,
     };
   }
 
   @ApiOperation({
-    summary: "Permite cerrar sesión de un usuario loggeado",
+    summary: "Permite cerrar sesión (web) y redireccionar al frontend",
   })
   @ApiBearerAuth("jwt-auth")
   @UseGuards(JwtAuthGuard)
   @Post("/signout")
   signOut(@Res({ passthrough: true }) res: Response) {
-    const isProd = process.env.NODE_ENV === "production";
+    res.clearCookie("access_token", this.getClearCookieOptions());
 
-    res.clearCookie("access_token", {
-      httpOnly: true,
-      secure: isProd,
-      sameSite: isProd ? "none" : "lax",
-    });
-
-    // return { message: "Sesión cerrada exitosamente" };
     const frontendUrl =
       this.config.get<string>("FRONTEND_URL") ||
       process.env.FRONT_URL ||
       "http://localhost:3005";
+
     return res.redirect(frontendUrl);
+  }
+
+  @ApiOperation({
+    summary: "Permite cerrar sesión (API) para pruebas con Thunder Client",
+  })
+  @ApiBearerAuth("jwt-auth")
+  @UseGuards(JwtAuthGuard)
+  @Post("/signout/api")
+  signOutApi(@Res({ passthrough: true }) res: Response) {
+    res.clearCookie("access_token", this.getClearCookieOptions());
+    return { message: "Sesión cerrada exitosamente" };
   }
 
   @ApiOperation({
     summary: "Permite registrar un usuario mediante formulario",
   })
-
   @Post("/signup")
   async signUp(
     @Body() user: CreateUserDto,
@@ -119,7 +140,7 @@ export class AuthController {
 
   @Get("google")
   @UseGuards(AuthGuard("google"))
-  googleLogin() { }
+  googleLogin() {}
 
   @Get("google/callback")
   @UseGuards(AuthGuard("google"))
