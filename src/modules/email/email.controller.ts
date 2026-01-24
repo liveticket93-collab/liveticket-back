@@ -20,12 +20,12 @@ export class EmailController {
     return this.emailService.sendEmail(email, message);
   }
 
-  @Post("successPurchase/:email")
-  send_success(@Param("email") email: string) {
-    const randomCode = Math.floor(
-      1000000000 + Math.random() * 9000000000
-    ).toString();
-    return this.emailService.sendPurchaseEmail(email, randomCode);
+  @Get("successPurchase")
+  send_success(@Query("email") email: string) {
+    return this.emailService.sendPurchaseEmail(
+      email,
+      Math.floor(1000000000 + Math.random() * 9000000000).toString()
+    );
   }
 
   /*
