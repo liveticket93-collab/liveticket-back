@@ -23,11 +23,10 @@ async function bootstrap() {
   app.use(express.json({ limit: "10mb" }));
   app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
-  const FRONTEND_URL = process.env.FRONTEND_URL || process.env.FRONT_URL;
+  const FRONTEND_URL = process.env.FRONTEND_URL || process.env.FRONT_URL!;
 
-  const allowedOrigins = ["http://localhost:3005", FRONTEND_URL].filter(
-    (v): v is string => typeof v === "string" && v.length > 0
-  );
+  const allowedOrigins = ["http://localhost:3005", FRONTEND_URL];
+  // .filter(    (v): v is string => typeof v === "string" && v.length > 0);
 
   app.enableCors({
     origin: allowedOrigins,

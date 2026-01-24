@@ -15,7 +15,7 @@ export class EmailService {
         to: email,
         from: process.env.SENDGRID_FROM_EMAIL!,
         subject: "Compra realizada",
-        html: `<p>Tu compra #${orderId} fue exitosa</p>`,
+        html: `<h1>Tu compra <b>#${orderId}</b> fue exitosa</h1>`,
       });
 
       return { ok: true };
