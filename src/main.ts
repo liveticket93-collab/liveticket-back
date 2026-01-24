@@ -8,16 +8,17 @@ import { NestExpressApplication } from "@nestjs/platform-express";
 import * as express from "express";
 
 async function bootstrap() {
-  // ✅ Log corto para confirmar que se cargó el .env (borra después)
   console.log("ENV CHECK", {
     DB_HOST: process.env.DB_HOST,
     DB_PASSWORD_TYPE: typeof process.env.DB_PASSWORD,
     MAIL_HOST: process.env.MAIL_HOST,
     MAIL_PORT: process.env.MAIL_PORT,
     NODE_ENV: process.env.NODE_ENV,
+    FRONTEND_URL: process.env.FRONTEND_URL || process.env.FRONT_URL,
   });
 
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
+
   app.set("trust proxy", 1);
 
   app.use(express.json({ limit: "10mb" }));
@@ -25,12 +26,28 @@ async function bootstrap() {
 
   const FRONTEND_URL = process.env.FRONTEND_URL || process.env.FRONT_URL;
 
-  const allowedOrigins = ["http://localhost:3005", FRONTEND_URL].filter(
-    (v): v is string => typeof v === "string" && v.length > 0
-  );
+  const allowedOrigins = [
+    "http://localhost:3005",
+    "http://localhost:3000",
+    "https://ticket-live-1.vercel.app", 
+    FRONTEND_URL,
+  ].filter((v): v is string => typeof v === "string" && v.length > 0);
 
   app.enableCors({
-    origin: allowedOrigins,
+    origin: (origin, callback) => {
+      if (!origin) {
+        return callback(null, true);
+      }
+
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      return callback(
+        new Error(`CORS blocked for origin: ${origin}`),
+        false
+      );
+    },
     credentials: true,
   });
 
